@@ -1,0 +1,24 @@
+ZSHSHEBANG
+zmodload zsh/pcre
+setopt REMATCH_PCRE
+
+ticker="${1:u}"
+
+GZIP=
+url="https://finance.yahoo.com/quote/${ticker}/?p=${ticker}"
+
+html=$(curl -s "${url}"|gunzip -c)
+## the size of $html will be nearly 2MB (megabytes). yikes. The compressed download will be in
+## the hundreds of kilobytes. Yay, Bloated Websites!
+
+pcre_compile -m '<fin-streamer class=\"livePrice.*?</fin-streamer>'
+pcre_match -b -- "${html}"
+step1="${MATCH}"
+
+pcre_compile -m '<span>.*?</span>'
+pcre_match -b -- "${step1}"
+step2="${MATCH}"
+
+pcre_compile -m '[0-9]+\,{0,1}[0-9]*\.{0,1}[0-9]*'
+pcre_match -b -- "${step2}"
+print "${MATCH}"

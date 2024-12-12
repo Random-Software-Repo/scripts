@@ -1,0 +1,2 @@
+ZSHSHEBANG
+play -q -n synth 0.20 sin 800

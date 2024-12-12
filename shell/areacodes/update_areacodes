@@ -1,0 +1,21 @@
+#!/bin/sh
+
+#download the newest file
+wget --no-config https://www.bennetyee.org/ucsd-pages/area.html
+
+#get only the lines that have data on them
+grep "<tr><td align=center><a name=" area.html > area.trim1
+
+#replace all ending cell tags with a tab
+echo replace all ending cell tags with a tab
+cat area.trim1 | sed "s/<\/td[^<>]*>/	/g"  > area.trim2
+
+#remove all remaining tags.
+echo remove all remaining tags
+cat area.trim2 | sed "s/<[^<>]*>//g"  > area.trim3
+
+
+#backup area codes file
+mv areacodes areacodes.$(date "+%Y-%m-%d")
+cp area.trim3 areacodes
+rm area.trim? area.html

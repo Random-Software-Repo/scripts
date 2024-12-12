@@ -1,0 +1,66 @@
+ZSHSHEBANG
+
+## PMV more or less is the same as mv, but will make some assumptions about the final parameter
+## given and how it relates the the directory defined in $PORTALM.
+## If the final parameter is not a directory, but is a subdirectory within $PORTALM, then the subdirectory within $PORTALM will be used instead
+## If the final parameter is not a directory, and there is at least one more parameter, then $PORTALM will becomethe target for the move
+## If the final parameter is an existing file and there are more than one preceeding parameters, the move will fail as that would lose data
+
+## $PORTALM must be set in the environment prior to running pmv. if $PORTALM is not set, pmv will exit
+
+if [[ ! -n "${PORTALM}" ]]
+then
+	echo "PORTALM not set. Exiting"
+	exit -1
+fi
+
+params=("${@[@]}")
+
+lastparam="$params[${#params}]"
+
+#echo "Lastparam=\"${lastparam}\""
+
+if [[ ! -e "${lastparam}" ]]
+then
+	## last param doesn't exist
+	#echo "${lastparam} doesn't exist"
+	if [[ -d "${PORTALM}/${lastparam}" ]]
+	then
+		# while last param doesn't exist, there is a directory of that name in PORTALM, so we'll use that instead
+		params[${#params}]="${PORTALM}/${lastparam}"
+		lastparam="$params[${#params}]"
+		#echo "lastparam exists within PORTALM:\"${lastparam}\""
+		echo "mv \"${params[@]}\""
+		mv "${params[@]}"
+	else
+		## lastparam and PORTALM/lastparam both do not exist and are not directories.
+		## If there is one previous parameter, then move/rename the previous parameter to lastpaam, 
+		if [[ "${#params}" == 2 ]]
+		then
+			echo "mv \"${params[@]}\""
+			mv "${params[@]}"
+		else
+			echo "Cannot move more than one file into another. Too many parameters supplied."
+			exit -23
+		fi
+	fi
+else
+	# lastparam exists
+	if [[ -d "${lastparam}" ]]
+	then
+		# last param is a directory, so moving there is just fine.
+		if [[ "${#params}" -ge 2 ]]
+		then
+			echo "mv \"${params[@]}\""
+			mv "${params[@]}"
+		else
+			echo "Cannot move a directory into itself. Not enough parameters."
+			exit -44
+		fi
+	else
+		# lastparam is a file that already exists, so we'll move these to $PORTALM instead.
+		params+="${PORTALM}"
+		echo "mv \"${params[@]}\""
+		mv "${params[@]}"
+	fi
+fi

@@ -1,0 +1,152 @@
+ZSHSHEBANG
+function usage
+{
+	print "Usage:"
+	print "  ffmx [options ] <video file name> [<video file name> ...]"
+	print ""
+	print "FFMX will loop over all input video and inspect each one"
+	print "determining its frame rate and resolution. FFMX will then"
+	print "call ffm with options to ensure that the converted video"
+	print "will not exceed a specified resolution, nor will they "
+	print "exceed certain frame rates."
+	print ""
+	print "Options:"
+	print "  -n                 No Operation. ffmx will analyze all videos"
+	print "                     but only print which videos would have been"
+	print "                     re-encoded and for which reasons. No videos"
+	print "                     will be altered."
+	print "  -r <resolution>    Where <resolution> is one of:"
+	print "                     360p, 480p, 540p, 720p, 1080p"
+	print "                     The resulting video will be scaled to fit"
+	print "                     completely within the specified resolution"
+	print "                     (where 1080p corresponds to 1920 x 1080"
+	print "                     pixels, and the others follow the expected"
+	print "                     corresponding standards)."
+	print "  -fps               Will cap the frame rate at 30fps. The new"
+	print "                     frame rate will follow this schedule:"
+	print "                       original frame rate      new frame rate"
+	print "                       ----------------------------------------"
+	print "                         less than 30fps          unchanged"
+	print "                        between 47 and 49            24"
+	print "                        between 49 and 51            25"
+	print "                          anything else              30"
+	exit 1
+}
+
+function analyzevideo
+{
+	local RESULTS=$(ffp "$1"| grep 'Video Stream')
+
+	if [[ ${LIMITRESOLUTION} ]]
+	then
+		RESOLUTIONX=$(print "$RESULTS" | awk '{print $5}')
+		RESOLUTIONY=$(print "$RESULTS" | awk '{print $7}'| grep -o '[0-9]*')
+
+		if [[ ${RESOLUTIONX} -gt ${RESOLUTIONSX[${LIMITRESOLUTION}]} || ${RESOLUTIONY} -gt ${RESOLUTIONSY[${LIMITRESOLUTION}]} ]]
+		then
+			RESOLUTIONPARAMETER=${RESOLUTIONPARAMS[${LIMITRESOLUTION}]}
+			ORIGINALRESOLUTION="${RESOLUTIONX}x${RESOLUTIONY}"
+		else
+			RESOLUTIONPARAMETER=
+		fi
+	fi
+	if [[ ${LIMITFRAMERATE} ]]
+	then
+		FRAMERATE=$(print "$RESULTS" | grep -o 'frame rate: [0-9]*/[0-9]*'| grep -o '[0-9]*/[0-9]*')
+		NOMINATOR=$(print $FRAMERATE | awk -F / '{print $1}')
+		DENOMINATOR=$(print $FRAMERATE | awk -F / '{print $2}')
+		(( FRAMERATE = ${NOMINATOR}.0/${DENOMINATOR}.0 ))
+		if [[ ${FRAMERATE} -le 30.0 ]]
+		then
+			FRAMERATEPARAMETER=
+		elif [[ ${FRAMERATE} -ge 47.0 && ${FRAMERATE} -le 49.0 ]]
+		then
+			FRAMERATEPARAMETER='-f24'
+			ORIGINALFRAMERATE=${FRAMERATE}
+		elif [[ ${FRAMERATE} -ge 49.0 && ${FRAMERATE} -le 51.0 ]]
+		then
+			FRAMERATEPARAMETER='-f25'
+			ORIGINALFRAMERATE=${FRAMERATE}
+		else
+			FRAMERATEPARAMETER='-f30'
+			ORIGINALFRAMERATE=${FRAMERATE}
+		fi
+	fi
+}
+
+DOREENCODE=YES
+FRAMERATEPARAMETER=
+ORIGINALFRAMERATE=
+RESOLUTIONPARAMETER=
+ORIGINALRESOLUTION=
+RESOLUTIONSX=("640" "854" "960" "1280" "1920")
+RESOLUTIONSY=("360" "480" "540" "720" "1080")
+RESOLUTIONPARAMS=("-360" "-480" "-540" "-720" "-1080")
+LIMITEFRAMERATE=
+LIMITRESOLUTION=
+while [[ "${1}" ]]
+do
+	FRAMERATEPARAMETER=
+	RESOLUTIONPARAMETER=
+	ORIGINALFRAMERATE=
+	ORIGINALRESOLUTION=
+	case "${1}" in
+		'-h'|'--help')
+			usage
+			;;
+		'-n')
+			DOREENCODE=
+			;;
+		'-fps')
+			LIMITFRAMERATE=1
+			;;
+		'-r')
+			shift
+			case "${1}" in
+				'360p')
+					LIMITRESOLUTION=1
+					;;
+				'480p')
+					LIMITRESOLUTION=2
+					;;
+				'540p')
+					LIMITRESOLUTION=3
+					;;
+				'720p')
+					LIMITRESOLUTION=4
+					;;
+				'1080p')
+					LIMITRESOLUTION=5
+					;;
+				*)
+					print "${1} is not a supported resolution."
+					print "Supported resolutions are: 360p, 480p, 540p, 720p, or 1080p"
+					exit -1
+					;;
+			esac
+			;;
+		*)
+			analyzevideo "${1}"
+			if [[ ${FRAMERATEPARAMETER} || ${RESOLUTIONPARAMETER} ]]
+			then
+				print ${1}
+				print "Framerate Parameter:\"${FRAMERATEPARAMETER}\"  (${ORIGINALFRAMERATE})"
+				print "Resolution Parameter:\"${RESOLUTIONPARAMETER}\"  (${ORIGINALRESOLUTION})"
+				if [[ ${DOREENCODE} ]]
+				then
+					print "Re-encoding...."
+					local NEWF="${1:r}.new.${1:e}"
+					ffm -delete ${FRAMERATEPARAMETER} ${RESOLUTIONPARAMETER} "${1}" "${NEWF}"
+					if [[ -e "${NEWF}" ]]
+					then
+						mv "${NEWF}" "${1}"
+					fi
+				fi
+			fi
+			;;
+	esac
+	shift
+done
+
+
+exit 2

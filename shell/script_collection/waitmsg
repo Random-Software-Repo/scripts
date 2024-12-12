@@ -1,0 +1,139 @@
+ZSHSHEBANG
+
+function usage
+{
+	print "Usage:"
+	print "	waitmsg [options] <processid> [<message>]"
+	print ""
+	print "waitmsg will wait until <processid> exits. During this time waitmsg"
+	print "will print a \"spinning\" animation along with the supplied <message>"
+	print "followed by animated dots (. .. ... ....). When <processid> exits, "
+	print "waitmsg will exit as well. If <processid> does not exist, waitmsg will"
+	print "exit immediately."
+	print ""
+	print "Options:"
+	print " -s <spinner>"
+	print "		Uses the specified spinner (a through w). Use -p to list the spinners."
+	print "		The default spinner is 'u' (${spinners[u]}). Option 'a' is (almost) the"
+	print "		classic unix spinner (${spinners[a]})."
+	print "		If <spinner> is more than 1 character in length, waitmsg will use THAT"
+	print "		as the animation instead of any of the pre-defined spinners."
+	print " -p"
+	print "		Does not wait, and instead prints all the spinning animation options."
+	print " -d <seconds>"
+	print "		Delay between frames in seconds. Default is 0.2."
+	print " -n"
+	print "		Does not print animated dots after the message."
+	exit 1
+}
+
+function showspinners
+{
+	local sk=(a b c d e f g h i j k l m n o p q r s t u v w)
+	for k in ${sk}
+	do
+		print "${k}: ${spinners[${k}]}"
+	done
+}
+
+typeset -A spinners
+spinners[a]='│╱─╲│╱─╲'
+spinners[b]='🡠🡤🡡🡥🡢🡦🡣🡧'
+spinners[c]='🡐🡔🡑🡕🡒🡖🡓🡗'
+spinners[d]='⯇⯅⯈⯆'
+spinners[e]='⮜⮝⮞⮟'
+spinners[f]='➀➁➂➃➄➅➆➇➈➉'
+spinners[g]='◴◷◶◵'
+spinners[h]='⁘⁙⁛⁙'
+spinners[i]='⌜⌝⌟⌞'
+spinners[j]='⚬⚭⚯'
+spinners[k]='⧱⧰⧲⧳'
+spinners[l]='⨁⨂'
+spinners[m]='⬖⬘⬗⬙'
+spinners[n]='䷡䷍䷈䷉䷌䷠䷌䷉䷈䷍'
+spinners[o]='꜈꜉꜊꜋꜌꜑꜐꜏꜎꜍'
+spinners[p]='𝌇𝌉𝌏𝌡𝌏𝌉'
+spinners[q]='𝍩𝍪𝍫𝍬𝍭𝍬𝍫𝍪'
+spinners[r]='🀱🀲🀳🀴🀵🀶🀷🀾🁅🁌🁓🁚🁡🁠🁟🁞🁝🁜🁛🁔🁍🁆🀿🀸'
+spinners[s]='🕛🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚'
+spinners[t]='🞅🞆🞇🞈🞉🞈🞇🞆'
+spinners[u]='🞎🞏🞐🞑🞒🞓🞒🞑🞐🞏🞎'
+spinners[v]='🞵🞶🞷🞸🞹🞺🞹🞸🞷🞶'
+spinners[w]='🌑🌒🌓🌔🌕🌖🌗🌘'
+
+dots=( '     ' '     ' '     ' '.    ' '.    ' '.    ' '..   ' '..   ' '..   ' '...  ' '...  ' '...  ' '.... ' '.... ' '.... ')
+dlim=${#dots}
+pid=
+message=
+spinner=${spinners[u]}
+delay=0.2
+
+if [[ $# == 0 ]]
+then
+	usage
+fi
+while [[ "${1}" ]]
+do
+	case "${1}" in
+		'-p')
+			showspinners
+			exit 1
+			;;
+		'-s')
+			shift
+			if [[ ${#1} -gt 1 ]]
+			then
+				spinner="${1}"
+			else
+				spinner=${spinners[${1}]}
+			fi
+			;;
+		'-n')
+			dots=
+			;;
+		'-d')
+			shift
+			delay=${1}
+			;;
+		*)
+			if [[ -n "${pid}" ]]
+			then
+				message="${1}"
+			else
+				pid="${1}"
+			fi
+			;;
+	esac
+	shift
+done
+
+
+
+lim=${#spinner}
+
+c=1 
+d=1
+
+#'ps -q ${1} -o comm= 2&>1 > /dev/null'
+ps -q ${pid} -o comm= &>> /dev/null
+while [[ $? -eq 0 ]]
+do
+	print -n "\r$spinner[${c}]  ${message}$dots[${d}]"
+	(( c++ ))
+	if [[ ${c} -gt ${lim} ]]
+	then
+		c=1
+	fi
+	if [[ -n "${dots}" ]]
+	then
+		(( d++ ))
+		if [[ ${d} -gt ${dlim} ]]
+		then
+			d=1
+		fi
+	fi
+	sleep ${delay}
+	ps -q ${pid} -o comm= &>> /dev/null
+done
+print  "\r                         "
+

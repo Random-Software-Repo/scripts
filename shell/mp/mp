@@ -1,0 +1,126 @@
+ZSHSHEBANG
+###############################################################################
+###                                                                         ###
+###    Plays audio, image or video files using MPV                          ###
+###                                                                         ###
+###############################################################################
+	function usage()
+	{
+		echo "Usage:"
+		echo "	mp [options] <audio, video or image file> [<files>...] [<directory>]"
+		echo ""
+		echo "where options are:"
+		echo "		-shuffle"
+		echo "			Plays the files in random order."
+		echo "		-coverart"
+		echo "			If playing audio files, will display the first"
+		echo "			embeded image as cover art (cover art is not "
+		echo "			displayed by default)"
+		echo "		-<number>:<number>"
+		echo "			Force playback of videos at the specified aspect"
+		echo "			ratio. This will override the embeded aspect "
+		echo "			ratio in the file. Common aspect ratios are 4:3,"
+		echo "			16:9 and, possibly, 16:10. Any values can be used."
+		echo "		-<number>"
+		echo "			If playing (displaying) image files, set the delay"
+		echo "			between images to <number> seconds. (default is 5)"
+		echo "		-h"
+		echo "			Display this help file."
+		echo ""
+		echo "mp will play the listed media files. in the indicated order unless"
+		echo "the -shuffle option has been provided. "
+		echo ""
+		echo "If the last parameter provided is a directory that exists, AND all the"
+		echo "previous parameters, of which there must be at least one, are all files,"
+		echo "then the files will be MOVED into that directory. This is a potentially"
+		echo "dangerous option that really shouldn't be here. But it is. So be careful." 
+		
+		exit 0
+	}
+
+	local player="mpv"
+	local aspect=
+	local shuffle=
+	local move=
+	local coverart="--audio-display=no"
+	local duration="--image-display-duration=5"
+
+	if [[ $# -lt 1 ]]
+	then
+		usage
+	fi
+
+	#Parse options
+	# this loop will eat all leading paramters that start with a dash.
+	# any actual file name starting with a dash will be ignored and not
+	# played.
+	while [[ "${1:0:1}" == "-" ]]
+	do
+		case "${1}" in
+			-h)
+				usage
+				;;
+			-shuffle)
+				shuffle="--shuffle"
+				;;
+			-coverart)
+				coverart="--audio-display=embedded-first"
+				;;
+			*)
+				parm=${1:1}
+				if [[ "${parm}" =~ "^[0-9]+:[0-9]+$" ]]
+				then
+					## check to see if the parameter looks like an aspect ration 
+					## ( i.e <number>:<number>, e.g. 4:3 or 16:10 ) and use that 
+					## as the aspect ration override
+					aspect="--video-aspect-override=${parm}"
+					echo "Aspect ratio override ${aspect}"
+				elif [[ "${parm}" =~ "^[0-9]+$" ]]
+				then
+					## check to see if the parameter looks like a number and use
+					## that value as the delay for image displays in seconds for
+					## image files (default is 5 second)
+					duration="--image-display-duration=${parm}"
+				fi
+				;;
+		esac
+		shift
+	done
+
+	# check to see if the last parameter is an existing directory
+	# and all preceeding parameters are existing files.
+	# if they are, we'll call move instead of the player 
+	if [[ -d "${argv[$#]}" ]]
+	then
+		# last file exists and is a directory
+		# so we'll move files so long as all the other 
+		# parameters are files and not something else 
+		count=1
+		(( penult = $# -1 ))
+		while [[ "$count" -le "${penult}" ]]
+		do
+			##echo "Examing parameter $count ( \"${argv[$count]}\" )"
+			if [[ -f "${argv[$count]}" ]]
+			then
+				# parameter is a regular file, so move=yes
+				##echo "\tregular file"
+				move=yes
+			else
+				# parameter is a directory or device, so unset move 
+				##echo "\t\FILE IS A DIRECTORY/DEVICE"
+				move=
+				break
+			fi
+			(( count ++ ))
+		done
+	fi
+	##echo move = $move
+	# now, we've done our checks, so either play or move the files as
+	# we've so determined
+	if [[ -n ${move} ]]
+	then
+		echo Moving files to "${argv[$#]}" 
+		mv "$@"
+	else
+		${player} --fullscreen ${aspect} ${shuffle} ${coverart} ${duration} "$@"
+	fi

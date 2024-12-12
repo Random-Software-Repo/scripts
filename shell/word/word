@@ -1,0 +1,49 @@
+ZSHSHEBANG
+fname=${0:t}
+local resource_path="${0:h}/../share/words/words"
+if [[ ! -r ${resource_path} ]]
+then
+	resource_path="/usr/local/share/words/words"
+fi
+#echo "resource path = \"${resource_path}\""
+
+if [[ "${1}" ]]
+then
+	while [[ "${1}" ]]
+	do
+		case ${fname} in
+			wordsstartingwith)
+				echo "WORDS STARTING WITH \"${1}\""
+				grep -hi "^${1}" "${resource_path}"
+				;;
+			wordsendingwith)
+				echo "WORDS ENDING WITH \"${1}\""
+				grep -hi "${1}\$" "${resource_path}"
+				;;
+			wordscontaining)
+				echo "WORDS CONTAINING \"${1}\""
+				grep -hi "${1}" "${resource_path}"
+				;;
+			*)
+				echo "WORDS MATCHING \"${1}\""
+				grep -hi "^${1}\$" "${resource_path}"
+				;;
+		esac
+		shift
+	done
+else
+	echo " USAGE:"
+	echo "	word <pattern> [<pattern>...]"
+	echo "		will find all words matching <pattern> [<pattern>...]"
+	echo "	wordscontaining <pattern> [<pattern>...]"
+	echo "		will find all words containing <pattern> [<pattern>...]"
+	echo "	wordsstartingwith <pattern> [<pattern>...]"
+	echo "		will find all words starting with <pattern> [<pattern>...]"
+	echo "	wordsendingwith <pattern> [<pattern>...]"
+	echo "		will find all words ending with <pattern> [<pattern>...]"
+	echo "	"
+	echo " <pattern> is any plain text or grep-compatible regular expression."
+	echo " All searches are case-insensitive even if <pattern> is not."
+fi
+
+

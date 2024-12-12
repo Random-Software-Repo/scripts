@@ -1,0 +1,39 @@
+ZSHSHEBANG
+
+# kills and disables baloo and tracker indexing services for kde and gnome respectively.
+
+#must be run as a user, but some parts require sudo
+
+if [[ $(which balooctl) ]]
+then
+	echo "balooctl"
+	balooctl suspend
+	balooctl disable
+	balooctl purge
+elif [[ $(which balooctl6) ]]
+then
+	echo "balooctl6"
+	balooctl6 suspend
+	balooctl6 disable
+	balooctl6 purge
+fi
+
+## Kills the tracker services and purges the database
+## as root
+for d in /etc/xdg/autostart/tracker-miner*
+do
+	sudo rm "${d}"
+	sudo touch "${d}"
+	sudo chattr +i "${d}"
+done
+
+sudo systemctl stop tracker-miner-fs-3.service
+sudo systemctl stop tracker-extract-3.service
+systemctl mask --user --now tracker-miner-fs-3.service
+systemctl mask --user --now tracker-extract-3.service
+
+rm -rf ~/.cache/tracker3
+ln -s /dev/null ~/.cache/tracker3
+
+rm -rf ~/.local/share/tracker
+ln -s /dev/null ~/.local/share/tracker

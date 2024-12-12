@@ -1,0 +1,64 @@
+ZSHSHEBANG
+
+#set null glob opton so if we attempt to run "convertgpx *.gpx" it won't throw an error
+setopt null_glob
+
+
+function usage()
+{
+	print "2kml converts GPX files to KML and removes time stamps and track points to allow"
+	print "clean importing into Google Earth. This shouldn't be necessary, but Google Earth"
+	print "is broken and will not allow for displaying GPX tracks without adding a time "
+	print "slider."
+	print ""
+	print "Usage:"
+	print "	2kml [<file name> [...<file name>]]"
+	print ""
+	print "Where <file name> is a file in GPX format. If no <file name> is specified, then"
+	print "2kml will convert all GPX files (files with the file extension .gpx) in the "
+	print "current directory." 
+	print "All converted files will have the original file name but with a .kml extension "
+	print "replacing the original .gpx extension. If this file already exists in the working"
+	print "directory, it will be over-written."
+	exit 0
+}
+
+
+function convertgpx()
+{
+	if [[ "$#" == "0" ]]
+	then
+		usage
+	fi
+
+	while [[ -n "${1}" ]]
+	do
+		print "\nConverting \"${1}\""
+		ogr2ogr -f KML /vsistdout/ "${1}" | grep -v '<SimpleData name="time">' > "${1:r}.kml" 
+		START_OF_TRACK_POINTS=$(cat "${1:r}.kml" | grep -n "<Folder><name>track_points</name>" | awk -F: '{print $1}')
+		echo "Start: ${START_OF_TRACK_POINTS}"
+
+		array_of_lines=("${(@f)$(  cat "${1:r}.kml" | grep -n "</Folder>"   )}")
+
+		for line in $array_of_lines
+		do
+			linenumber=$(echo "${line}" | awk -F: '{print $1}')
+			if [[ ${linenumber} -gt ${START_OF_TRACK_POINTS} ]]
+			then
+				END_OF_TRACK_POINTS=${linenumber}
+			fi
+		done
+		echo "End: ${END_OF_TRACK_POINTS}"
+		sed -i "${START_OF_TRACK_POINTS},${END_OF_TRACK_POINTS}d" ${1:r}.kml
+
+		shift 1
+	done
+}
+
+
+if [[ "$#" == "0" ]]
+then
+	convertgpx *.gpx
+else
+	convertgpx "$@"
+fi

@@ -1,0 +1,240 @@
+ZSHSHEBANG
+
+# Markdown (standard) to PDF
+
+function usage
+{
+	echo "Usage:"
+	echo "	md2pdf <input file> [<output file>]"
+	echo ""
+	echo " where <input file> is a text file in standard markdown format."
+	echo " The output in PDF format will be saved to <output file> if it"
+	echo " is specified, or to <input file basename>.pdf if not specified."
+}
+
+function getcss
+{
+	echo '<style>
+header {
+	display:none;
+}
+
+body {
+  color: black;
+  font-family: Georgia, Palatino, Times, serif;
+  font-size: 12pt;
+  line-height: 1.3;
+  background: transparent;
+}
+
+a {
+  color: #0645ad;
+  text-decoration: none;
+}
+
+p {
+  margin-top: 1em;
+}
+
+img {
+  max-width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111;
+  line-height: 125%;
+  font-weight: normal;
+  page-break-after: avoid;
+}
+
+h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 24pt;
+}
+
+h2 {
+  font-size: 20pt;
+}
+
+h3 {
+  font-size: 16pt;
+}
+
+h4 {
+  font-size: 14pt;
+}
+
+h5 {
+  font-size: 12pt;
+}
+
+h6 {
+  font-size: 10pt;
+}
+
+blockquote {
+  color: #666666;
+  margin: 0;
+  padding-left: 3em;
+  border-left: 0.5em #EEE solid;
+}
+
+hr {
+  display: block;
+  height: 2px;
+  border: 0;
+  border-top: 1px solid #aaa;
+  border-bottom: 1px solid #eee;
+  margin-top: 1em;
+  padding: 0;
+}
+
+pre, code {
+  color: #000;
+  font-family: Inconsolata, monospace;
+  font-size: 90%;
+}
+
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+b, strong {
+  font-weight: bold;
+}
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+ul, ol {
+  margin: 1em 0;
+  padding: 0 0 0 2em;
+}
+
+li p:last-child {
+  margin-bottom: 0;
+}
+
+ul ul, ol ol {
+  margin: .3em 0;
+}
+
+dl {
+  margin-bottom: 1em;
+}
+
+dt {
+  font-weight: bold;
+  margin-bottom: .8em;
+}
+
+dd {
+  margin: 0 0 .8em 2em;
+}
+
+dd:last-child {
+  margin-bottom: 0;
+}
+
+img {
+  border: 0;
+  vertical-align: middle;
+}
+
+table {
+  margin-bottom: 2em;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: .2em 1em;
+  background-color: #eee;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+table td {
+  padding: .2em 1em;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  vertical-align: top;
+}
+</style>'
+}
+
+if [[ $# == 1 ]]
+then
+	infile="${1}"
+	outfile="${1:r}.pdf"
+elif [[ $# == 2 ]]
+then
+	infile="${1}"
+	outfile="${2}"
+else
+	usage
+	exit 1
+fi
+if [[ -e "${infile}" ]]
+then
+	inheader=
+	instyle=
+	css='<link rel="stylesheet" href="STYLESHEET" />'
+	pandoc --from=markdown_mmd+yaml_metadata_block+smart --standalone --to=html --metadata title="${1:t:r}" --css "STYLESHEET" "${infile}" | while read txt
+	do
+		if [[ "${inheader}" == "true" ]]
+		then
+			if [[ "${txt}" =~ "^./header" ]]
+			then
+				inheader=
+			fi
+		elif [[ "${instyle}" == "true" ]]
+		then
+			if [[ "${txt}" =~ "^./style" ]]
+			then
+				instyle=
+			fi
+		elif [[ "${txt}" == "${css}" ]]
+		then
+			echo "$(getcss)"
+		elif [[ "${txt}" =~ "^.header" ]]
+		then
+			inheader=true
+		elif [[ "${txt}" =~ "^.style" ]]
+		then
+			instyle=true
+		elif [[ "${txt}" =~ "^.script" ]]
+		then
+			# do nothing
+		else
+			echo "$txt"
+		fi
+	done | wkhtmltopdf  -B 20mm -T 20mm -L 25mm -R 25mm -q -s Letter  - "${outfile}"
+
+	#'<link rel="stylesheet" href="STYLESHEET" />'
+	;# | wkhtmltopdf -B 25mm -T 25mm -L 25mm -R 25mm -q -s Letter - "${outfile}" 
+	#pandoc --from=markdown_mmd+yaml_metadata_block+smart -t html5 --css ${0:h}/md2pdf.css ${infile} -o ${outfile} -s --pdf-engine=wkhtmltopdf
+	#pandoc -V 'mainfont:DejaVuSans' -f markdown_strict "${infile}" -s -o "${outfile}"
+else
+	echo "Error: Input file \"${infile}\" does not exist. "
+	exit -1
+fi
+

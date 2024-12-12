@@ -1,0 +1,104 @@
+ZSHSHEBANG
+VERBOSE=
+
+function msg
+{
+	if [[ ${VERBOSE} ]]
+	then
+		print "$@"
+	fi
+}
+
+function usage
+{
+	print "Usage:"
+	print "sleeptil [OPTIONS] TIMESPEC [command [options]]"
+	print ""
+	print "sleeptil will sleep until the TIMESPEC specified. If TIMESPEC"
+	print "is already in the past, sleeptil will complete immediately."
+	print ""
+	print "If command is provided, command will run after sleeping has"
+	print "completed. Only one command will be run. Any additional parameters"
+	print "will be passed to the command as options."
+	print ""
+	print "OPTIONS:"
+	print "	-n	Do nothing but print the duration in seconds that sleeptil"
+	print "		would have slept (without the -n option)."
+	print "	-v	Print extra messages during execution."
+	print ""
+	print "TIMESPEC Is any STRING compatible with the date command. STRING"
+	print "is a mostly free format human readable date string such as "
+	print "\"Sun, 29  Feb 2004  16:21:42 -0800\" or \"2004-02-29 16:21:42\""
+	print "or even \"next Thursday\". A TIMESPEC string may contain items"
+	print "indicating calendar date, time of day, time zone, day of week,"
+	print "relative time, relative date, and numbers. An empty string"
+	print "indicates the beginning of the day. The date string format is"
+	print "more complex than is easily documented here but is fully de‐"
+	print "scribed in the info documentation for the date command."
+	print ""
+	print "Examples:"
+	print "	Sleep for 1000 seconds:"
+	print "		sleeptil '1000 seconds'"
+	print "	Sleep for 5 hours. 30 minutes:"
+	print "		sleeptil '5 hours 30 minutes'"
+	print "	Sleep until 9:00am, next Friday (current time zone):"
+	print "		sleeptil '09:00 next Fri'"
+	print "	Sleep until 1:00am (tomorrow morning):"
+	print "		sleeptil '1:00am tomorrow'"
+	print "	Sleep until 5:00am today, even if 5:00am has already passed:"
+	print "		sleeptil '5:00am'"
+	print "	Sleep until 2:00am (tomorrow) and then rsync /home to /backups"
+	print "		sleeptil '2:00am tomorrow' rsync -avrHAxl --del  /home /backups/"
+	exit
+}
+
+NOP=
+for opt in "$@"
+do
+	if [[ "${opt}" == "-n" ]]
+	then
+		NOP=1
+		VERBOSE=1
+		shift 1
+	fi
+	if [[ "${opt}" == "-v" ]]
+	then
+		VERBOSE=1
+		shift 1
+	fi
+done
+
+if [[ "$#" -lt 1 ]]
+then
+	usage
+fi
+
+SLEEPTIL=$(date --date=${1} '+%s')
+NOW=$(date '+%s')
+((
+DURATION=SLEEPTIL - NOW
+))
+
+msg "Sleep from $NOW to $SLEEPTIL"
+msg "Duration : $DURATION seconds"
+
+if [[ $NOP ]]
+then
+	exit
+fi
+
+if [[ ${DURATION} -lt 1 ]]
+then
+	msg "DURATION IS LESS THAN 1"
+else
+	msg "DURATION IS POSITIVE"
+	sleep ${DURATION}
+fi
+
+if [[ "$#" -gt 1 ]]
+then
+	shift
+	command=${1}
+	shift
+	${command} "$@"
+fi

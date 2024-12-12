@@ -1,0 +1,10 @@
+ZSHSHEBANG
+
+
+for favfile in "$@"
+do	
+	favpath="${favfile:h}"
+	newfavfile="${favfile:t}"
+	echo mv "${favfile}" "${favpath}/fav__${newfavfile}"
+	mv "${favfile}" "${favpath}/fav__${newfavfile}"
+done

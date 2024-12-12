@@ -1,0 +1,34 @@
+ZSHSHEBANG
+
+	####
+	#### renames a list of files or directories by pre-pending a string to the
+	#### file names. the pre-pend operation will only affect the file name or 
+	#### last path segment itself, and not the path.
+	####	e.g. 
+	####		prefix AAAA directory/textfile.txt
+	####	will result in directory/AAAAtextfile.txt
+	####	while 
+	####		prefix AAAA anotherfile.txt
+	####	will result in AAAAanotherfile.txt
+	
+	pfix="${1}"
+	shift
+	while [[ -n "$1" ]]
+	do
+		#Split the target file into path and file name
+		local ppath="${1:h}"
+		local ffile="${1:t}"
+
+		#if there is a path portion of the target, append a / to 
+		#it so that when re-assebling the full path/file it'll
+		#be correct and we don't need any logic in the mv command
+		if [[ -n "${ppath}" ]]
+		then
+			ppath="${ppath}/"
+		fi
+		echo \"${1}\"
+		#move target file $1 to path+prefix+target
+		mv "${1}" "${ppath}${pfix}${ffile}"
+		echo
+		shift
+	done

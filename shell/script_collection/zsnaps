@@ -1,0 +1,216 @@
+ZSHSHEBANG
+units=(B K M G T P E)
+function reduce
+{
+	local unitindex=1
+	local totalused=${totalusedbyfilesystem[$1]}
+	###printf "Total used by \"%s\":%f%s\n" "$1" $totalused "${units[${unitindex}]}" >&2
+	while [[ $totalused -gt 1024 ]]
+	do
+		((totalused = totalused / 1024.0 ))
+		(( unitindex ++ ))
+		###printf "Total used by \"%s\":%f%s\n" "$1" $totalused "${units[${unitindex}]}" >&2
+	done
+
+	totalusedbyfilesystem[$1]=$totalused
+	totalusedunitbyfilesystem[$1]=${units[${unitindex}]}
+	###printf "Total used by \"%s\":%f%s\n" "$1" "$totalusedbyfilesystem[$1]" "$totalusedunitbyfilesystem[$1]" >&2
+}
+
+function reduceallfs
+{
+	local unitindex=1
+	while [[ $totalusedbyallfilesystems -gt 1024 ]]
+	do
+		((totalusedbyallfilesystems = totalusedbyallfilesystems / 1024 ))
+		(( unitindex ++ ))
+	done
+	totalunitusedbyallfilesystems=${units[${unitindex}]}
+}
+
+function add
+{
+	###printf "p1:%s\np2:%s\n" "$1" "$2" >&2
+	local unit=${2: -1}
+	local len=${#2}
+	(( len = len -1 ))
+	local value=${2[0,$len]}
+	local total=$1
+	local newtotal=0
+	local multiplier=1024
+	case $unit in
+		'M')
+			(( multiplier = multiplier * 1024 ))
+			;;
+		'G')
+			(( multiplier = multiplier * 1024 * 1024 ))
+			;;
+		'T')
+			(( multiplier = multiplier * 1024 * 1024 * 1024 ))
+			;;
+		'P')
+			(( multiplier = multiplier * 1024 * 1024 * 1024 * 1024 ))
+			;;
+	esac
+	(( newtotal = total + value * multiplier ))
+	###printf "%f = %f + %f * %f\n" $newtotal $total $value $multiplier >&2
+	print -n "$newtotal"
+
+}
+
+function usage
+{
+	print "Zsnaps lists and summarizes usage of snapshots. That is, it will list all"
+	print "snapshots on the systems (or as desired), and add up the on-storage usage"
+	print "for all those snapshots and print the total space used."
+	print ""
+	print "Usage:"
+	print "	zsnapd [options] [[query_string]...]"
+	print "	where options are:"
+	print "		-h	prints this help screen and exits."
+	print "	and query_string is one or more strings or grep regular expressions"
+	print "	that will limit snapshots to only those matching the string/expression."
+	print ""
+	print "	Examples:"
+	print "		zsnaps			# will summarize all snapshots on the system."
+	print ""
+	print "		zsnaps /home@		# will limit output to only datasets named home."
+	print ""
+	print "		zsnaps 2023-08-01	# will limit output to snapshots containing the"
+	print "					# string 2023-08-01 (in the dataset name or "
+	print "					# snapshot tag). "
+	print ""
+	print "		zsnaps /home@ /root@	# will limit output to datasets named home "
+	print "					# and root."
+	print ""
+	exit -1
+}
+
+typeset -a search
+
+while [[ "$1" ]]
+do
+	case "$1" in
+		'-h') usage
+			;;
+		*)
+			search+=("$1")
+			;;
+	esac
+	shift 1
+done
+
+dosum=
+if [[ ${#search} == "0" ]]
+then
+	dosum=Y
+	search+=("*")
+fi
+typeset -A totalusedbyfilesystem
+typeset -A totalusedunitbyfilesystem
+
+for param in "$search[@]"
+do
+	OIFS=$IFS
+	totalusedbyfilesystem=()
+	totalusedunitbyfilesystem=()
+	local -a res
+	local totalusedbyallfilesystems=0
+	local totalunitusedbyallfilesystems=B
+
+	maxlen=0
+	if [[ "$param" == "*" ]]
+	then
+		res=($(zfs list -Ht snapshot ))
+	else
+		print "$param"
+		res=($(zfs list -Ht snapshot | grep --color=never "$param" ))
+	fi
+
+	local d=1
+	local snapshotcount=0
+	
+	while [[ "$d" -lt "$#res" ]]
+	do
+		local snap="${res[${d}]}"
+		(( snapshotcount ++ ))
+		IFS=@ filesystem=$snap[(w)1]
+		totalusedbyfilesystem[$filesystem]=0
+		totalusedunitbyfilesystem[$filesystem]=B
+
+		len=${#snap}
+
+		if [[ $len -gt $maxlen ]]
+		then
+			maxlen=$len
+		fi
+		(( d += 5 ))
+	done
+
+	printf -v ttlabel "Total used by all %d snapshots:" snapshotcount
+	slen=${#ttlabel}
+	if [[ $slen -gt $maxlen ]]
+	then
+		maxlen=$slen
+	fi
+
+
+	previousfilesystem=
+	local d=1
+	fssnapshotcount=0
+	while [ $d -lt $#res ]
+	do
+		local snap="${res[${d}]}"
+		IFS=@ filesystem=$snap[(w)1]
+		(( d++ ))
+
+		local used="${res[${d}]}"
+		###print "ADD line 65">&2
+		totalusedbyfilesystem[$filesystem]=$(add $totalusedbyfilesystem[$filesystem] $used)
+		(( d++ ))
+		avail="${res[${d}]}"
+		(( d++ ))
+		refer="${res[${d}]}"
+		(( d++ ))
+		mpoint="${res[${d}]}"
+		(( d++ ))
+
+		if [[ -n ${previousfilesystem} ]]
+		then
+			if [[ ! ${filesystem} == ${previousfilesystem} ]]
+			then
+				ptlabel=
+
+				printf -v ptlabel "Total used by %d snapshot%s:" fssnapshotcount $(if [[ $fssnapshotcount -eq 1 ]]; then print -n ""; else print -n "s";fi)
+				reduce ${previousfilesystem}
+				printf -v USEDFINAL '\t%2.2f%s' $totalusedbyfilesystem[${previousfilesystem}] $totalusedunitbyfilesystem[$previousfilesystem]
+				###print "ADD line 84">&2
+				totalusedbyallfilesystems=$(add $totalusedbyallfilesystems ${USEDFINAL} )
+				print "${(l($maxlen)( ))ptlabel}${USEDFINAL}\n"
+				fssnapshotcount=0
+			fi
+		fi
+
+		print "${(r($maxlen)( ))snap}\t$used\t$avail\t$refer\t$mpoint"
+
+		(( fssnapshotcount ++ ))
+		previousfilesystem=${filesystem}
+	done
+
+	local rtlabel=
+	printf -v rtlabel "Total used by %d snapshot%s:" fssnapshotcount $(if [[ $fssnapshotcount -eq 1 ]]; then print -n ""; else print -n "s";fi)
+	reduce ${previousfilesystem}
+	###print "Previous file system: \"${previousfilesystem}\"" >&2
+	printf -v USEDFINAL '\t%2.2f%s' $totalusedbyfilesystem[${previousfilesystem}] $totalusedunitbyfilesystem[$previousfilesystem]
+	print "${(l($maxlen)( ))rtlabel}${USEDFINAL}"
+	###print "ADD line 202">&2
+	totalusedbyallfilesystems=$(add ${totalusedbyallfilesystems} ${USEDFINAL} )
+	if [[ $dosum ]]
+	then
+		reduceallfs
+		printf -v TOTALUSEDFINAL '\t%2.2f%s\n' $totalusedbyallfilesystems $totalunitusedbyallfilesystems
+		print "${(l($maxlen)( ))ttlabel}${TOTALUSEDFINAL}"
+	fi
+	printf "----------------------------------------------------------\n"
+	IFS=$OIFS
+done

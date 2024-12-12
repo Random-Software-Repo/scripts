@@ -1,0 +1,89 @@
+ZSHSHEBANG
+
+#
+#	will move the contents of a source directory into a target directory
+#
+function usage
+{
+	print "Usage:"
+	print ""
+	print "mergedirs <source directory> <target directory>"
+	print ""
+	print "Files in <source directory> will be moved to <target directory>."
+	print "If there is a conflict in the file names (the same file name exists"
+	print "in both source and target), then the older file will have a (1) "
+	print "inserted between the base file name and it's extension."
+	exit 1
+}
+function error
+{
+	print "$1" >&2
+}
+
+if [[ "$#" -eq 2 ]]
+then
+	## two parameters
+	if [[ -d "${1}" ]]
+	then
+		## parameter 1 exists and is a directory
+		source="${1}"
+		if [[ -d "${2}" ]]
+		then
+			## parameter 2 exists and is a directory
+			target="${2}"
+			if [[ "${source}" != "${target}" ]]
+			then
+				## do the merge.
+				for d in ${source}/*(D)
+				do
+					local file="${d:t}"
+					#echo "${file}"
+					if [[ -e "${target}/${file}" ]]
+					then
+						## target file already exists
+						## 1) check to see if they're identical (name & contents), if so delete source and leave existing target
+						## 2) If they're not identical, figure out which one's older. that one gets the (1) file name addition.
+						cmp -s "${d}" "${target}/${file}"
+						if [[ $? -eq 0 ]]
+						then
+							## the files are identical, just delete the source
+							echo "rm -f \"${d}\""
+							rm -f "${d}"
+						else
+							## the files are not identical
+							if [[ "${target}/${file}" -nt "${d}" ]]
+							then
+								# target exists and is newer than file we're tyring to merge into, so rename source
+								echo "mv \"${d}\" \"${target}/${file:r}.(1).${file:e}\"" 
+								mv "${d}" "${target}/${file:r}.(1).${file:e}"
+							else
+								# target exists and is older, so it get's renamed and the other file is moved 
+								echo "mv \"${target}/${file}\" \"${target}/${file:r}.(1).${file:e}\""
+								mv "${target}/${file}" "${target}/${file:r}.(1).${file:e}"
+								echo "mv \"${d}\" \"${target}/${file}\""
+								mv "${d}" "${target}/${file}"
+							fi
+						fi
+					else
+						# target does not exist, so it's safe to move file into diretory
+						echo "mv \"${d}\" \"${target}/${file}\""
+						mv "${d}" "${target}/${file}"
+					fi
+				done
+				## source should now be empty
+				echo "rm -rf \"${source}\""
+				rm -rf "${source}"
+				exit 0
+			else
+				error "Source and destination are then same. They must be different."
+			fi
+		else
+			error "Destination (${2}) is not a directory."
+		fi
+	else
+		error "Source (${1}) is not a directory."
+	fi
+else
+	error "Incorrect number of parameters ($#). Must be 2 parameters."
+fi
+usage

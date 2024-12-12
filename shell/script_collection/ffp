@@ -1,0 +1,261 @@
+ZSHSHEBANG
+zmodload zsh/mathfunc
+
+function resetStreamVars()
+{
+
+####UNIVERSAL
+	stream=
+	codec_name=
+	codec_long_name=
+	codec_type=
+	#TAG:NUMBER_OF_FRAMES
+	frames=
+	#TAG:NUMBER_OF_BYTES
+	bytes=
+	#TAG:BPS-eng
+	bps=
+	#TAG:DURATION-eng
+	duration=
+####VIDEO	
+	width=
+	height=
+	pix_fmt=
+	avg_frame_rate=
+	
+####AUDIO	
+	sample_fmt=
+	sample_rate=
+	channels=
+	channel_layout=
+	#TAG:language
+	language=
+}
+
+function getVar()
+{
+	echo "$(echo "$1" | awk -F = '{print $2}')"
+}
+
+function checkVar()
+{
+####UNIVERSAL
+	if [[ "$1" =~ 'index=.*' ]]
+	then
+		stream=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'codec_name=.*' ]]
+	then
+		codec_name=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'codec_long_name=.*' ]]
+	then
+		codec_long_name=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'codec_type=.*' ]]
+	then
+		codec_type=$(getVar "$1")
+	fi
+
+
+	#duration
+	if [[ "$1" =~ '^duration' ]]
+	then
+		local dur=$(getVar "$1")
+		duration=$(formatDuration "$dur" )
+	fi
+	#TAG:DURATION-eng
+	
+	if [[ "$1" =~ '^TAG:DURATION' ]]
+	then
+		local dur=$(getVar "$1")
+		duration=$(formatDuration "$dur" )
+	fi
+	#TAG:NUMBER_OF_FRAMES
+	
+	if [[ "$1" =~ '^TAG:NUMBER_OF_FRAMES' ]]
+	then
+		frames=$(getVar "$1")
+	fi
+	#TAG:NUMBER_OF_BYTES
+	
+	if [[ "$1" =~ '^TAG:NUMBER_OF_BYTES' ]]
+	then
+		bytes=$(getVar "$1")
+	fi
+	#TAG:BPS-eng
+	
+	if [[ "$1" =~ '^TAG:BPS' ]]
+	then
+		bps=$(getVar "$1")
+	fi
+
+####VIDEO	
+	
+	if [[ "$1" =~ 'width=.*' ]]
+	then
+		width=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'height=.*' ]]
+	then
+		height=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'pix_fmt=.*' ]]
+	then
+		pix_fmt=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'avg_frame_rate=.*' ]]
+	then
+		avg_frame_rate=$(getVar "$1")
+	fi
+	
+####AUDIO	
+	
+	if [[ "$1" =~ 'sample_fmt=.*' ]]
+	then
+		sample_fmt=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'sample_rate=.*' ]]
+	then
+		sample_rate=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'channels=.*' ]]
+	then
+		channels=$(getVar "$1")
+	fi
+	
+	if [[ "$1" =~ 'channel_layout=.*' ]]
+	then
+		channel_layout=$(getVar "$1")
+	fi
+	#TAG:language
+	
+	if [[ "$1" =~ 'TAG:language=.*' ]]
+	then
+		language=$(getVar "$1")
+	fi
+}
+
+function formatTimeUnit()
+{
+	local formatted=
+	if [[ "$1" -lt 1 ]]
+	then
+		formatted="00"
+	elif [[ "$1" -lt 10 ]]
+	then
+		formatted="0${1}"
+	else
+		formatted="${1}"
+	fi
+	echo $formatted
+}
+
+function formatSeconds()
+{
+		local seconds=$((int(rint(${1}))))
+		local minutes
+		local hours
+		(( minutes = seconds / 60 ))
+		(( seconds = seconds - (minutes * 60) ))
+		(( hours = minutes / 60 ))
+		(( minutes = minutes - (hours * 60 ) ))
+		local hoursString=
+		local minutesString=
+		local secondsString=
+		if [[ "${hours}" -gt 0 ]]
+		then
+			hoursString=${hours}
+			minutesString=":$(formatTimeUnit ${minutes})"
+			secondsString=":$(formatTimeUnit ${seconds})"
+		elif [[ "${minutes}" -gt 0 ]]
+		then
+			minutesString="$(formatTimeUnit ${minutes})"
+			secondsString=":$(formatTimeUnit ${seconds})"
+		else
+			secondsString="${seconds}"
+		fi
+
+		echo ${hoursString}${minutesString}${secondsString}
+
+}
+function formatDuration()
+{
+	#echo "1 \"$1\"" 1>&2 
+	if [[ "$1" =~ "^[0-9]+\.[0-9]+$" ]]
+	then
+		echo "$(formatSeconds ${1} )"
+		#echo "1 \"$1\" matched" 1>&2 
+	elif [[ "$1" =~ "^[0-9]+:[0-9][0-9]:[0-9][0-9]\.[0-9]+$" ]]
+	then
+		local timeparts=(${(s.:.)1})
+		local seconds=${timeparts[3]}
+		local minutes=${timeparts[2]}
+		local hours=${timeparts[1]}
+		(( seconds = seconds + (minutes * 60) + (hours*60*60) ))
+		echo "$(formatSeconds ${seconds} )"
+	else
+		echo ">>${1}<<"
+	fi
+}
+
+function doVideo()
+{
+	echo "Video Stream ${stream}: ${codec_name}, $width x $height, frame rate: ${avg_frame_rate}, frames: ${frames}, duration: ${duration} "
+}
+
+functio doAudio()
+{
+	echo "Audio Stream ${stream}: ${codec_name}, Sample: ${sample_fmt} x ${sample_rate}, channels: ${channels} (${channel_layout}), Language: ${language}, duration: ${duration} "
+}
+
+function doSubtitle()
+{
+
+}
+
+for d in "$@" 
+do
+	local -a resultsarray
+	local results=$(ffprobe -hide_banner -v error -show_format -show_streams "${d}" )
+	#local duration=$(getDuration "${d}" )
+	resultsarray=("${(f)results}")
+	local lines=$#resultsarray
+	#codec_type="$(echo $results | grep codec_type)"
+	local index=0
+
+	while [[ $index -lt $lines ]]
+	do
+		(( index ++ ))
+		if [[ "${resultsarray[${index}]}" =~ "\[STREAM\]" ]]
+		then
+			#echo "Begin Stream"
+			resetStreamVars
+		elif [[ "${resultsarray[${index}]}" =~ "\[/STREAM\]" ]]
+		then
+			if [[ "${codec_type}" =~ "video" ]]
+			then
+				doVideo
+			elif [[ "${codec_type}" =~ "audio" ]]
+			then
+				doAudio
+			elif [[ "${codec_type}" =~ "subtitle" ]]
+			then
+				doSubtitle
+			fi
+		else
+			checkVar "${resultsarray[${index}]}"
+		fi
+		#echo $index : ${resultsarray[$index]}
+
+	done
+done
+

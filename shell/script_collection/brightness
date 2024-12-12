@@ -1,0 +1,110 @@
+ZSHSHEBANG
+zmodload zsh/pcre
+setopt RE_MATCH_PCRE
+
+function usage()
+{
+	echo "Brightness will set the brightness for all connected monitors to a"
+	echo "specified level. Brightness uses the underlying tool xrandr to set"
+	echo "the brightness level. xrandr must, therefore, be installed to work."
+	echo ""
+	echo "Usage"
+	echo " 	brightness <level>"	
+	echo ""
+	echo "	where level is a number in the range 0.1 to 1.0 where 1.0 is the "
+	echo "	maximum brightness and 0.1 is the minimum brightness, OR a number"
+	echo "	in the the range 10 to 100 where 100 is the maximum and 10 the"
+	echo "	minumum brightness, OR one of the following key words:"
+	echo "		BRIGHT, FULL, MAX or HIGH corresponding to a brightness of 1.0"
+	echo "		MED, MEDIUM or HALF corresponding to a brightness of 0.5"
+	echo "		LOW, MIN, MINIMUM or DIM corresponding to a brightness of 0.25"
+	echo "	The case of the key words is ignored."
+	echo "	Any value above the maximum of 1.0 (or 100) will be reduced to 1.0"
+	echo "	Any value below the minimum of 0.1 (or 10) will be increased to 0.1"
+	echo ""
+}
+
+
+minimum=0.1
+level=1.0
+
+
+if [[ "$1" == "-h" ]]
+then
+	usage
+	exit 1
+fi
+
+## Is $1 a numerical value? 
+if [[ "$1" =~ '^[0-9]*\.?[0-9]+$' ]]
+then
+	##echo "\"$1\" matched number." 
+	if [[ "${1}" -gt "1.0" ]]
+	then
+		##echo "Greater than 1.0"
+		level=${1}
+		##echo "level pre divide  $level"
+		(( level = level / 100.0 ))
+		##echo "level post divide $level"
+	else
+		##echo "Level less than or equal to 1 : $level"
+		level=${1}
+	fi
+	##echo "Level mid numerical processing: $level"
+	
+	if [[ "${level}" -gt "1.0" ]]
+	then
+		##echo "Greater than 1.0 (2nd)"
+		level=1.0
+	elif [[ "$level" -lt "$minimum" ]]
+	then
+		##echo "Less than Minimum:$minimum"
+		level=$minimum
+	fi
+	##echo "Level after numerical processing: $level"
+else
+	## Non numerical parameter.
+	## Parameters accepted:
+	##	Bright = 1
+	##	Full   = 1
+	##  Max    = 1
+	##	HIGH   = 1
+	MAX=1.0
+	##
+	##  Med    = 0.5
+	##  Medium = 0.5
+	##  Half   = 0.5
+	MED=0.5
+	##
+	##  Low    = 0.25
+	##  Min    = 0.25
+	##  Minimum= 0.25
+	##  Dim    = 0.25
+	LOW=0.25
+	##
+	level=1.0
+	levelword="${1:u}"
+	if [[ $levelword =~ "^(BRIGHT|FULL|MAX|HIGH)$" ]] 
+	then
+		#echo MAX
+		level=$MAX
+	elif [[ $levelword =~ "^(MED|MEDIUM|HALF)$" ]] 
+	then
+		#echo MED 
+		level=$MED
+	elif [[ $levelword =~ "^(LOW|MIN|MINIMUM|DIM)$" ]] 
+	then
+		#echo LOW 
+		level=$LOW
+	fi
+fi
+	##
+
+#echo Level = \"$level\"
+
+for monitor in $(xrandr -q | grep ' connected' | cut -d ' ' -f1 ) 
+do
+	#echo Monitor ${monitor}
+	#echo "xrandr --output ${monitor} --brightness \"${level}\""
+	xrandr --output ${monitor} --brightness "${level}"
+done

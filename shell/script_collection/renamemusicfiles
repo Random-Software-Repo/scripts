@@ -1,0 +1,180 @@
+ZSHSHEBANG
+
+# renames mp3, ogg, opus and flac files based on a hard coded pattern
+# the pattern is:
+#
+#
+#	/root_path_for_archive/album_artist/album_name/<disc - ><track_number - >track_name.extension
+#
+#	where 
+#		root path is defined in the variable $ARCHIVE_BASE
+#		album_artist is the tag <albumartist> if present, other wise the tag <artist> is used		
+#		if the tag <discnumber> is present then "discnumber - " is prefixed to the file name
+#		if the tag <tracknumber> is present then "tracknumber - " is prefixed to the file name, but after <discnumber> above
+#
+# renamemusicfiles assumes, expects and requires that the metadate within each file is correct and uniform.
+# renamemusicfiles does NOT manipulate the metadata, so any discrepancies or inconsistencies will be reflected in the new file names.
+
+## where we're moving them to (only set if variable is not already in the environment)
+if [[ ! -n "${ARCHIVE_BASE}" ]]
+then
+	ARCHIVE_BASE="${HOME}/Music"
+fi
+
+if [[ ! -d ${ARCHIVE_BASE} ]]
+then
+	echo "Destination directory \"${ARCHIVE_BASE}\" does not exist."
+	exit -1
+fi
+
+command -v exiftool > /dev/null
+if [[ ! $? == 0 ]]
+then
+	echo "Renamemusicfiles requires exiftool. Exiftool was not found on your path. Please install exiftool."
+	echo "Exiftool is likely in the package \"perl-Image-ExifTool\" in your operating system's package management system."
+	exit -1
+fi
+
+setopt nonomatch
+setopt null_glob
+
+function recurse
+{
+	local f=
+	local d=
+
+	for d in *(/F)
+	do
+		cd "${d}"
+		recurse "${1}	"
+		cd ..
+	done
+	for f in *(.)
+	do
+		#echo ${1}${f}
+		local fext=${f:e:l}
+	
+		resetFields
+		getTags "${fext}" "${f}"
+		#albumartist    = ${metadata[1]}
+		#artist         = ${metadata[2]}
+		#album          = ${metadata[3]}
+		#disc           = ${metadata[4]}
+		#tracknumber    = ${metadata[5]}
+		#tracktitle     = ${metadata[6]}
+		if [[ "${process}" ]]
+		then
+			if [[ ! "${metadata[1]}" == "-" ]]
+			then
+				DIRECTORY="${metadata[1]//\//|}"
+			elif [[ ! "${metadata[2]}" == "-" ]]
+			then
+				DIRECTORY="${metadata[2]//\//|}"
+			else
+				DIRECTORY=UnknownArtist
+				unknown=1
+			fi
+		
+			if [[ ! "${metadata[3]}" == "-" ]]
+			then
+				ALBUM="${metadata[3]//\//|}"
+			else
+				ALBUM=UnknownAlbum
+				unknown=1
+			fi
+		
+			if [[ ! "${metadata[4]}" == "-" ]]
+			then
+				DISC="(Disc ${metadata[4]//\//|}) "
+			fi
+			if [[ ! "${metadata[5]}" == "-" ]]
+			then
+				TRACK="${metadata[5]//\//|} - "
+			fi
+		
+			if [[ ! "${metadata[6]}" == "-" ]]
+			then
+				TITLE="${metadata[6]//\//|}"
+			else
+				TITLE=UnknownTrack
+				unknown=1
+			fi
+
+			if [[ "${unknown}" ]]
+			then
+				unknown=" -- ${f}"
+				echo "${1}${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}/${DISC}${TRACK}${TITLE}.${fext}${unknown}"
+				echo "${1}Missing Metadata in source file. Leaving the original."
+				echo "${1}Missing Metadata in source file. Leaving the original."
+				echo "${1}Missing Metadata in source file. Leaving the original."
+				echo "${1}Missing Metadata in source file. Leaving the original."
+			else
+				# moving file
+				echo "${1}${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}/${DISC}${TRACK}${TITLE}.${fext}"
+				if [ ! -d "${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}" ]
+				then
+					## destination directory does not exist, so create it
+					echo "${1}mkdir -p \"${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}\""
+					mkdir -p "${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}"
+				fi
+				
+				## copy file to new location
+				TFILENAME="${DISC}${TRACK}${TITLE}.${fext}"
+				TTLEN=${#TITLE}
+				while [[ ${#TFILENAME} -gt 255 ]]
+				do
+					(( TTLEN2 = TTLEN -1 ))
+					TITLE=${TITLE:0:${TTLEN2}}
+					TFILENAME="${DISC}${TRACK}${TITLE}.${fext}"
+					TTLEN=${#TITLE}
+					#echo "${1}SHORTEND ($TTLEN, $TTLEN2) FILENAME: ${TFILENAME}"
+				done
+				cp -p "${f}" "${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}/${TFILENAME}"
+				## verify that new file exists and is identical (content wise) to original
+				#verifyFiles "$f" "${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}/${DISC}${TRACK}${TITLE}.${fext}"
+				comparison=$(cmp "${f}" "${ARCHIVE_BASE}/${DIRECTORY}/${ALBUM}/${TFILENAME}" 2>&1 )
+				#echo "${1}comparison=\"$comparison\""
+				if [[ "$comparison" ]]
+				then
+					echo "${1}Error in copying file. Leaving the original."
+					echo "${1}Error in copying file. Leaving the original."
+					echo "${1}Error in copying file. Leaving the original."
+					echo "${1}Error in copying file. Leaving the original."
+				else
+					## remove original file
+					rm "${f}"
+				fi
+			fi
+		fi
+	done;
+}
+function resetFields
+{
+	metadata=
+	
+	DIRECTORY=
+	ALBUM=
+	DISC=
+	TRACK=
+	TITLE=
+	
+	unknown=
+	
+	process=
+
+}
+
+function getTags
+{	
+	if [[ "${1}" =~ "ogg|flac|opus" ]]
+	then
+		IFS=$'\n' metadata=($(exiftool -f -s3 -Albumartist  -Artist -Album -Discnumber -Tracknumber -Title "${2}"))
+		process=yes
+	elif [[ "${1}" =~ "mp3" ]]
+	then
+		IFS=$'\n' metadata=($(exiftool -f -s3 -Band  -Artist -Album -PartOfSet -Track -Title "${2}"))
+		process=yes
+	fi
+}
+
+recurse

@@ -1,0 +1,56 @@
+ZSHSHEBANG
+
+function usage()
+{
+	print "Usage:"
+	print "    rename <source text> <text> <file name> [<file name> ...]"
+	print ""
+	print "Rename will replace all occurences of <source text> with <text>"
+	print "in the file names of all files specified on the command line."
+	print "<source text> and <text> are both static strings, not expressions."
+	print ""
+	print "If <file name> includes a path, only the final element will"
+	print "be renamed. E.g: "
+	print "    rename cheese fromage ./food/cheeses/edam_cheese.txt"
+	print "will be renamed to ./food/cheeses/edam_fromage.txt"
+	print " and"
+	print "    rename cheese fromage ./foods/cheeses/cheesey_cheeses.txt"
+	print "will be renamed to ./foods/cheeses/fromagey_fromages.txt"
+	exit 1
+}
+
+if [[ $# -lt 3 ]]
+then
+	usage
+fi
+
+sourcetext=
+text=
+
+while [[ "${1}" ]]
+do
+	if [[ ! -n ${sourcetext} ]]
+	then
+		sourcetext="${1}"
+	elif [[ ! -n ${text} ]]
+	then
+		text="${1}"
+	elif [[ -e "${1}" ]]
+	then
+		local frompath="${1:h}"
+		local fromfile=${1:t}
+		local tofile="${fromfile//${sourcetext}/${text}}"
+		local destination="${frompath}/${tofile}"
+
+		if [[ "${fromfile}" != "${tofile}" ]]
+		then
+			if [[ ! -e "${destination}" ]]
+			then
+				mv "${1}" "${destination}"
+			else
+				print "\"${destination}\" already exists. Cannot rename \"${1}\"."
+			fi
+		fi
+	fi
+	shift
+done;

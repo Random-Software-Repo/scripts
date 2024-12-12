@@ -1,0 +1,27 @@
+ZSHSHEBANG
+function usage()
+{
+    print "Usage:"
+    print "     grepscript [script name] [file]"
+    print ""
+    print " Where [script name] is one of the unicode properties script names."
+    print " ( https://en.wikipedia.org/wiki/Unicode_character_property#Script )"
+    print " and [file] is the file to search in."
+    print ""
+    print "Examples:"
+    print "  To search for chinese characters (including japanese kanji and korean hango):"
+    print "      grepscipt han path/to/some/file.txt"
+    print ""
+    print "  To search for arabic characters:"
+    print "      grepscipt arabic path/to/some/file.txt"
+    exit 0
+  }
+
+if [[ ! "$#" == "2" ]]
+then
+  usage
+else
+  print "grep -P \"\\\p{Script=${1}}\" \"${2}\""
+  grep -P "\p{Script=${1}}" "${2}"
+fi
+

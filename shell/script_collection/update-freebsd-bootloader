@@ -1,0 +1,24 @@
+#!/bin/sh
+. /etc/os-release
+
+if [ "${NAME}" != "FreeBSD" ]
+then
+	echo "This utility is only for FreeBSD systems."
+else
+	cmp /boot/loader.efi /boot/efi/efi/freebsd/loader.efi
+	if [ $? -ne 0 ]
+	then
+		echo "Updating /boot/efi/efi/freebsd/loader.efi..."
+		cp /boot/loader.efi /boot/efi/efi/freebsd/loader.efi
+	else
+		echo "/boot/efi/efi/freebsd/loader.efi has already been updated."
+	fi
+	cmp /boot/loader.efi /boot/efi/efi/boot/bootx64.efi
+	if [ $? -ne 0 ]
+	then
+		echo "Updating /boot/efi/efi/boot/bootx64.efi..."
+		cp /boot/loader.efi /boot/efi/efi/boot/bootx64.efi
+	else
+		echo "/boot/efi/efi/boot/bootx64.efi has already been updated."
+	fi
+fi

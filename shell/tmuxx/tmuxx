@@ -1,0 +1,14 @@
+#!/bin/sh
+
+tmux ls 2> /dev/null | grep -q -v '(attached)'
+err=$?
+#echo "ERR: $err"
+if [ ${err} -eq 0 ]
+then
+	# There is a dettached tmux session. Re-attaching to the first one
+	# (well, the first one tmux chooses...)
+	tmux -2 attach-session
+else
+	# There are no dettached tmux sessions, creating a new one.
+	tmux -2 new-session
+fi

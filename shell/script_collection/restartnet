@@ -1,0 +1,12 @@
+ZSHSHEBANG
+FREEBSD=
+grep -q FreeBSD /etc/os-release && FREEBSD=YES
+if [[ "${FREEBSD}" == "YES" ]]
+then
+	echo "FREEBSD"
+	service netif restart && service routing restart
+else
+	echo "NOT-FREEBSD"
+	nmcli networking off && nmcli networking on
+
+fi

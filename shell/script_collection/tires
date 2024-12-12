@@ -1,0 +1,45 @@
+ZSHSHEBANG
+
+	if [[ "$#" -lt "2" || "$#" -gt 3 ]]
+	then
+		echo "Tires calculates the height of a tire based on it's radial (metric-ish) size"
+		echo "or the older bias-ply sizing used on some tractor / truck / atv tires."
+		echo "This will produce a calculated height in inches. However, manufactured"
+		echo "tires will not necessarily be exactly as tall as their size suggests."
+		echo "Actual tire size may vary considerably."
+		echo
+		echo "Usage: "
+		echo "	For radial (metric) tire sizes (e.g. 245/35R16):"
+		echo "		tires <width> <aspect> <wheel diameter>"
+		echo "	For bias-ply tires sizes (e.g. 14.9-24):"
+		echo "		tires <width> <wheel diameter>"
+		echo 
+		echo "	where"
+		echo "		<width> is the nominal width of the tire in millimeters for metric sizes,"
+		echo "			and inches for bias-ply sizes."
+		echo "		<aspect> is the aspect ratio of the tire (assumed to be 85 with bias-ply sizes)."
+		echo "		<wheel diameter> is the diameter of the wheel in inches."
+		echo 
+		echo "	For example, a tire labled \"285/75 R16\" the command would be:"
+		echo "		tires 285 75 16"
+		echo "	and for a bias-ply tractor tire 14.9-24 the command would be:"
+		echo "		tires 14.9 24"
+		return -1
+	fi
+
+	width=${1}
+	if [[ "$#" -eq 3 ]]
+	then
+		(( width = width / 25.4 ))
+		aspect=${2}
+		diameter=${3}
+	else
+		aspect=85.0
+		diameter=${2}
+	fi
+
+	(( aspect = aspect / 100.0 ))
+	(( height = ( width * aspect * 2.0 ) + diameter ))
+	#echo $(( (${twidth} * ${taspect} * 2.0 + ${twheel}*25.4)/25.4))
+
+	printf "%.2f\n" ${height}

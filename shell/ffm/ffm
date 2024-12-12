@@ -1,0 +1,808 @@
+ZSHSHEBANG
+
+
+###############################################################################
+###############################################################################
+###                                                                         ###
+###                                                                         ###
+###          FFM                                                            ###
+###                                                                         ###
+###          Multi-purpose video re-encoder / copier                        ###
+###                                                                         ###
+###          FFM is a wrapper for ffmpeg providing reasonable defaults      ###
+###          and foptions to easily re-encode video via h.265, h.264        ###
+###          or AV1 codecs, or to copy without re-ecoding.                  ###
+###                                                                         ###
+###          FFM also provides simple foptions to select quality levels,    ###
+###          subtitles, rescaling and extracting only a certain portion     ###
+###          of a video (within a time range).                              ###
+###                                                                         ###
+###                                                                         ###
+###############################################################################
+###############################################################################
+
+function usage()
+{
+	echo "FFM is a wrapper for ffmpeg that provides (hopefully) reasonable defaults"
+	echo "and simpler options for re-encoding videos using AV1, AVC or HEVC codecs"
+	echo "including an option for using NVidia's hardware acceleration. FFM also"
+	echo "provides an option to simply copy video without re-encoding. FFM does not"
+	echo "support most options available in ffmpeg. This is by design as FFM indends"
+	echo "to provide reasonable utility for most situtations. Situations which have"
+	echo "more complex requirements would still need to use ffmpeg directly."
+	echo ""
+	echo "USAGE:"
+	echo ""
+	echo "	ffm [options] <input file name> [<output file name or directory>]"
+	echo ""
+	echo "	With no options, ffm will re-encode <input file name> using libx265"
+	echo "	(HEVC) into <output file name> with a constant quality factor of 28."
+	echo "	Audio, subtitles and chapter streams will be copied."
+	echo ""
+	echo "	<output file name or directory>:"
+	echo "	If no output file is specified, ffm will use the base <input file name>"
+	echo "	in a matroska container (.mkv). The output will be in the same drectory"
+	echo "	as the <input file name>. If that name is already in use, a counter will"
+	echo "	be inserted before the extension sufficient to make the name unique."
+	echo "	E.g. \"somefile.mp4\" would become \"somefile.mkv\" or \"somefile.(1).mkv\""
+	echo "	as necessary."
+	echo "	If <output file name or directory> itself is a directory, the output will "
+	echo "	be written there following the above patterns."
+	echo "	If <output file name or directory> is not provided or is not a directory or"
+	echo "	does not include a path (e.g. ./somefile.mkv or /place/for/file.mp4), and"
+	echo "	the environment variable FFM_DEFAULT_PATH is set to a directory that exists,"
+	echo "	the output will be written to FFM_DEFAULT_PATH following the above patterns."
+	echo ""
+	echo "	Options:"
+	echo "		-av1"
+	echo "			Use libaom-av1 to re-encode with the AV1 codec with"
+	echo "			a constant quality factor of 30 (see -quality)."
+	echo "		-avc"
+	echo "		-x264"
+	echo "		-h.264"
+	echo "			Use libx264 to re-encode with the AVC codex with a"
+	echo "			constant quality factor of 23 (see -quality)."
+	echo "		-hevc"
+	echo "		-x265"
+	echo "		-h.265"
+	echo "			Use libx265 to re-encode with the HEVC codec with a "
+	echo "			default constant quality factor of 28  (see -quality)."
+	echo "			This is the  default."
+	echo "		-n265"
+	echo "		-nhevc"
+	echo "			Use hevc_nvenc to re-encode with the Nvidia NEVC"
+	echo "			hardware accelerated codec. This requires a compatible"
+	echo "			NVidia GPU, drives and (usually) the CUDA library along" 
+	echo "			with a version of ffmpeg compiled with support for them."
+	echo "			While the NVidia encoder does fairly well, many options"
+	echo "			do not work with it as expected."
+	echo "		-copy"
+	echo "			Will copy video directly into the new file without any"
+	echo "			re-encoding or other modifications. This is not compatible"
+	echo "			with rescaling but IS compatible with \"-s\" and \"-d\" for"
+	echo "			extracting a segment of a video."
+	echo "		-quality <quality factor>"
+	echo "			Sets the constant quality factor (crf in ffmpeg terms) for"
+	echo "			the chosen codec. The <quality factor> broadly has a range"
+	echo "			of 0 to 51, though this really varies by codec and other"
+	echo "			factors. For our purposes 0 to 51 is good enough. Lower"
+	echo "			values are higher quality. A Zero (0) is lossless quality"	
+	echo "			while 51 is little better than a potato. The default quality"
+	echo "			factor for AV1 is 30, HEVC is 28 and AVC is 23. These should"
+	echo "			produce broadly equivalent quality videos from the same "
+	echo "			source. Quality can only be set for HEVC, AVC and AV1 codecs"
+	echo "		-lossless|-veryhigh|-high|-average|-low|-verylow|-potato"
+	echo "			Alternate way to specify \"-quality\" without using the actual"
+	echo "			numerical values. These options correspond to specific values"
+	echo "			that vary by codec (this in an ffm thing). The values are:"
+	echo "			       lossless|veryhigh| high |average|  low |verylow|potato"
+	echo "			AVC        0       6       12      23     29    35      51"
+	echo "			HEVC       0       7       14      28     35    42      51"
+	echo "			AV1        0       7       15      30     37    45      51"
+	echo "			Quality can only be set for HEVC, AVC and AV1 codecs."
+	echo "		-ultrafast|-superfast|-veryfast|-faster|-fast|-medium|-slow|-slower|-veryslow"
+	echo "			Sets the encoder's encoding speed preset when using constant"
+	echo "			quality. This changes how fast the encoder works and does NOT"
+	echo "			affect the quality itself. The faster the encoder works, the "
+	echo "			larger the resulting file will be (at the otherwise specified"
+	echo "			quality factor). That is, \"-ultrafast\" will result in larger"
+	echo "			files (but complete more quickly) while \"-veryslow\" will"
+	echo "			produce smaller files but take considerably longer to complete."
+	echo "			These options are only compatible with HEVC, AVC and AV1 when"
+	echo "			using a constant quality factor (not using the -br option)."
+	echo "		-2160|-1080|-720|-540|-480|-360"
+	echo "			Rescales the video to 2160p (3840x2160), 1080p (1920 x 1980), "
+	echo "			720p (1280 x 720), 540p (860 x 540), 480p (854 x 480) or"
+	echo "			360p (640 x 360) while maintaining the original aspect ratio. "
+	echo "			If the original video resolution is strange (not exactly one of"
+	echo "			these resolutions), ffmpeg may pad the output dimensions slightly."
+	echo "		-f24|-f25|-f30"
+	echo "			Resamples the video frame rate to the indicated rate: 24, 24 or 30"
+	echo "			frames per second respectively. These options do not check the"
+	echo "			input frame rate and do not make any attempt to correct for user"
+	echo "			mistakes. That is if you specify -f24 for a 60fps video, it'll"
+	echo "			result in a 24fps video which probaly won't be as good as you'd"
+	echo "			hoped."
+	echo "		-br <bit rate in kilo bits per second>"
+	echo "			Changes the encoding to use a constant bit rate rather than a"
+	echo "			constant quality. This option unsets any constant quality"
+	echo "			options that may have been set intentionally or by default."
+	echo "		-s <start time in seconds>"
+	echo "			Starts encoding at <start time in seconds> and ignores anything"
+	echo "			before that. Due to idiosyncracies of video encoding, it is"
+	echo "			often impossible to start at exactly a specified time. Ffmpeg"
+	echo "			will do the best it can in those cases."
+	echo "		-d <duration in seconds>"
+	echo "			Stops encoding after <duration in seconds>. The resulting video"
+	echo "			will be approximately <duration in seconds> seconds long. Due"
+	echo "			to idiosyncracies in video encoding, the acutal duration may"
+	echo "			be slightly different."
+	echo "		-sub"
+	echo "			Copies subtitles."
+	echo "		-ass"
+	echo "			Copies subtitles into the ass format (I don't make these up,"
+	echo "			I just sez what I sees). If you get errors concerning subtitles,"
+	echo "			this option will usually clear them up."
+	echo "		-y"
+	echo "			Overrite output files without notice. Ffmpeg will not, by default,"
+	echo "			overrite a file if it already exists. This short-circuits that"
+	echo "			sometimes annoying behavior. Of course, you may overrite something"
+	echo "			you didn't want to, but that's your own affair if you use this"
+	echo "			option."
+	echo "		-q|-quiet"
+	echo "			Does not display the output of ffmpeg which, while very informative,"
+	echo "			can be rather a lot. You will lose any feedback on how far along or"
+	echo "			how fast ffmpeg is actually working until it's all done, but the"
+	echo "			output will be neater."
+	echo "		-nop|-no-op|-no"
+	echo "			Does nothing except print out the ffmpeg command that"
+	echo "			would have been called but for this option."
+	echo "		-trim"
+	echo "			Excludes any streams in the file not explicitly copied. Without any"
+	echo "			other options, this would be only video and audio streams. Adding"
+	echo "			one of the subtitle options (-sub or -ass) would be necessary to "
+	echo "			include those. This is useful when a source video includes some stream"
+	echo "			that is not supported either by ffmpeg or by the container you wish"
+	echo "			to use as a target."
+	echo "		-delete"
+	echo "			Will delete <input file name> after ffmpeg has done it's thing if"
+	echo "			and only if <output file name> exists and has the same run time as"
+	echo "			<input file name> or if -d and/or -s was specified, if it has an"
+	echo "			appropriate run time deduced from those options. Actually, the run-"
+	echo "			time of the <output file name> is allowed to be within -0.1 seconds"
+	echo "			to +5 seconds of the expected value as there are some legitimate reasons "
+	echo "			why ffmpeg can't start or end at an exact point in a video stream, "
+	echo "			or that the reported time of the streams may be slightly different."
+	echo "			Obviously, one should be very careful using this option as there is"
+	echo "			no possibility of recovery from mistakes."
+	echo "		-ffmpeg <path to ffmpeg>"
+	echo "			Option to specify an alternate ffmpeg to use or simply tell ffm where"
+	echo "			ffmpeg is when it is not otherwise on the path."
+	echo "		-archive"
+	echo "			This is for archiving video for future viewing (not editing). It sets"
+	echo "			the codec to HEVC, constant quality CRF 15, Preset SLOW, key frames"
+	echo "			every 2 seconds, and ( not yet enabled) 10bit color. This should"
+	echo "			produce an encoded video whose quality is visually indistinguishable"
+	echo "			from a lossless encoding (or the original if the original was lower"
+	echo "			quality). It won't really be that good, but you will be unlikely to"
+	echo "			be able to see the difference. This is for archiving video for future"
+	echo "			viewing (not editing)."
+	echo "		-archiveav1"
+	echo "			As -archive, but using the AV1 codec."
+	echo ""
+	echo "	Alternatives"
+	echo "		On can link (hard or softlinks) to the ffm script itself. Ffm will take"
+	echo "		into account the command used to invoke it and change defaults accoringly."
+	echo "		Alternate names understood by ffm are x265, x264, xav1 and xavc. Each of"
+	echo "		these options will choose the default codec as if passing the parameters"
+	echo "		-x265, -x264, -av1, or -avc to ffm respectively. Also, ffmcp, ffmcpy or"
+	echo "		ffmcopy will both act as if -copy was passed in as a normal parameter."
+	echo ""
+	echo "Examples:"
+	echo "	ffm myvideo.mp4"
+	echo "		will reencode using HEVC, Constant Quality 28 to myvideo.HEVC.mkv"
+	echo "	ffm -720 -high -x264 myvideo.mp4 myvideo.720p.mp4"
+	echo "		will reencode using AVC, high quality (15), scaled 720p to myvide.720p.mp4"
+	echo "	ffm -s 360 -d 90 -copy myvideo.mkv"
+	echo "		will copy 90 seconds from myvideo.mp4 starting at the 360 second mark to"
+	echo "		myvideo.(1).mkv"
+	echo "	x264 myvideo.mp4 myvideo.mkv"
+	echo "		will, if x264 is a link to ffm, re-encode using AVC with defaults to myvideo.mkv"
+	echo "	ffm /some/path/video.mp4"
+	echo "		will reencode using HEVC to /some/path/video.mkv"
+	echo "	ffm /some/path/video.mp4 /some/other/path/"
+	echo "		will reencode using HEVC to /some/other/path/video.mkv"
+	echo ""
+	exit -2
+}
+
+function get_duration
+{
+	#echo "file name ${1}"
+	local duration=$(ffprobe -v error -hide_banner -select_streams v:0 -show_format "${1}" | grep duration)
+	#echo "Probe:${duration}"
+	if [[ "${duration}" =~ '^duration=.*' ]]
+	then
+		duration="${duration:9}"
+	
+	else
+		echo "Bad duration \"${duration}\""
+	fi
+	#echo "Duration \"${duration}\""
+	echo ${duration}
+}
+
+function delete_original
+{
+	message "Deleting original..."
+	local induration=$(get_duration "${foptions[IN_FILE_NAME]}" )
+	if [[ ! "${induration}" =~ '^Bad.*' ]]
+	then
+		local expectedruntime=${induration}
+		local starttime=0
+		local duration=
+		local lowtime=
+		local hightime=
+		if [[ -n "${foptions[START_VALUE]}" ]]
+		then
+			starttime="${foptions[START_VALUE]}"
+			(( expectedruntime = expectedruntime - starttime ))
+		fi
+		if [[ -n  "${foptions[END_VALUE]}" ]]
+		then
+			duration="${foptions[END_VALUE]}"
+			if [[ $duration -lt $expectedruntime ]]
+			then
+				expectedruntime=$duration
+			fi
+		fi
+		local outduration=$(get_duration "${foptions[OUT_FILE_NAME]}" )
+		message "In duration ${induration}"
+		message "Expected Runtime ${expectedruntime}"
+		message "Out duration ${outduration}"
+		if [[ $expectedruntime -gt 0 ]]
+		then
+			## now, choose a fuzz factor range for what is acceptably close
+			local lowfuzzfactor=0.1
+			local highfuzzfactor=5.0
+			## If the outduration is within fuzzfactor seconds of expectedruntime
+			## then we deem that acceptably close and will delete the original.
+			##		(expectedruntime - lowfuzzfactor) <= outduration <= (expectedduration + highfuzzfactor)
+			(( lowtime = expectedruntime - lowfuzzfactor ))
+			(( hightime = expectedruntime + highfuzzfactor ))
+			message "($expectedruntime - $lowfuzzfactor) <= $outduration <= ($expectedruntime + $highfuzzfactor)"
+			message "($lowtime) <= $outduration <= ($hightime)"
+			if [[ $outduration -ge $lowtime && $outduration -le $hightime ]]
+			then
+				message "The duration of the new file (${foptions[OUT_FILE_NAME]}) is within allowable range of the original."
+				message "Deleting \"${foptions[IN_FILE_NAME]}\" now..."
+				rm "${foptions[IN_FILE_NAME]}"
+			else
+				message "The duration of the new file (${foptions[OUT_FILE_NAME]}) is outside allowable range of the original."
+				message "No files will be deleted."
+			fi
+		else
+			error "Expected runtime of the new video is $expectedruntime seconds. That doesn't make any sense.\nNo files were deleted."
+		fi
+	else
+		error "Duration of \"$foptions[IN_FILE_NAME]\" is \"${induration}\". That looks wrong."
+	fi
+}
+
+function setHEVC
+{
+	CODEC="HEVC"
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]="libx265"
+	if [[ ! -n "$foptions[BITRATE_OPTION]" ]]
+	then
+		foptions[CONSTANTQUALITY_OPTION]="-crf"
+		foptions[CONSTANTQUALITY_VALUE]=28
+		foptions[PRESET_OPTION]="-preset"
+		foptions[PRESET_VALUE]="medium"
+	fi
+}
+
+function setAV1
+{
+	CODEC="AV1"
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]='libaom-av1'
+	foptions[BITRATE_OPTION]="-b:v"
+	foptions[BITRATE_VALUE]="0"
+	foptions[CONSTANTQUALITY_OPTION]="-crf"
+	foptions[CONSTANTQUALITY_VALUE]=30
+	foptions[PRESET_OPTION]=
+	foptions[PRESET_VALUE]=
+}
+
+function setARCHIVE
+{
+	CODEC="HEVC"
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]="libx265"
+	if [[ -n "$foptions[BITRATE_OPTION]" ]]
+	then
+		$foptions[BITRATE_OPTION]=
+	fi
+	foptions[CONSTANTQUALITY_OPTION]="-crf"
+	foptions[CONSTANTQUALITY_VALUE]=15
+	foptions[PRESET_OPTION]="-preset"
+	foptions[PRESET_VALUE]="slow"
+	## Need to set color space to 10bit  -pix_fmt yuv420p10le
+	## Need to set key frames every 2 seconds -force_key_frames 'expr:gte(t,n_forced*2)'
+	foptions[KEYFRAMES_OPTION]="-force_key_frames"
+	foptions[KEYFRAMES_VALUE]='expr:gte(t,n_forced*2)'
+}
+
+function setARCHIVEAV1
+{
+	CODEC="AV1"
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]="libaom-av1"
+	if [[ -n "$foptions[BITRATE_OPTION]" ]]
+	then
+		$foptions[BITRATE_OPTION]=
+	fi
+	foptions[CONSTANTQUALITY_OPTION]="-crf"
+	foptions[CONSTANTQUALITY_VALUE]=15
+	foptions[PRESET_OPTION]="-preset"
+	foptions[PRESET_VALUE]="slow"
+	## Need to set color space to 10bit
+	## Need to set key frames every 2 seconds -force_key_frames 'expr:gte(t,n_forced*2)'
+	foptions[KEYFRAMES_OPTION]="-force_key_frames"
+	foptions[KEYFRAMES_VALUE]='expr:gte(t,n_forced*2)'
+}
+
+function setAVC
+{
+	CODEC="AVC"
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]="libx264"
+	if [[ ! -n "$foptions[BITRATE_OPTION]" ]]
+	then
+		foptions[CONSTANTQUALITY_OPTION]="-crf"
+		foptions[CONSTANTQUALITY_VALUE]=23
+		foptions[PRESET_OPTION]="-preset"
+		foptions[PRESET_VALUE]="medium"
+	fi
+}
+
+function setCOPY
+{
+	CODEC=COPY
+	foptions[VIDEO_OPTION]="-c:v"
+	foptions[VIDEO_VALUE]="copy"
+	foptions[CONSTANTQUALITY_OPTION]=
+	foptions[CONSTANTQUALITY_VALUE]=
+	foptions[PRESET_OPTION]=
+	foptions[PRESET_VALUE]=
+	foptions[VF_OPTION]=
+	foptions[VF_VALUE]=
+	foptions[BITRATE_OPTION]=
+	foptions[BITRATE_VALUE]=
+}
+
+function message
+{
+	if [[ ! -n "${QUIET}" ]]
+	then
+		echo "${1}"
+	fi
+}
+
+function error
+{
+	echo "[38;5;1m${1}[38;5;15m" >&2
+	exit -1
+}
+
+function check_ffmpeg
+{
+	if [[ ! "${FFMPEG}" == "no-op" ]]
+	then
+		local fullpathtoffmpeg=$(/usr/bin/which ${FFMPEG} 2> /dev/null)
+		if [[ -e "${fullpathtoffmpeg}" ]]
+		then
+			if [[ -x "${fullpathtoffmpeg}" ]]
+			then
+				local ffmpegversion=$(${fullpathtoffmpeg} -version -hide_banner &> /dev/null | grep "ffmpeg version")
+				if [[ ! -n "${ffmpegversion}" ]]
+				then
+					if [[ "${FFMPEG}" == "ffmpeg" ]]
+					then
+						error "FFMPEG is required for ffm to function.\nThe command \"${fullpathtoffmpeg}\" does not appear to be ffmpeg, or is a version of ffmpeg ffm does not expect."
+					else
+						error "FFMPEG is required for ffm to function.\nThe command \"${FFMPEG}\" provided does not seem to be ffmpeg."
+					fi
+				fi
+			else
+				## This error shouldn't ever occur as "/usr/bin/which $FFMPEG" won't product a result for
+				## someting that isn't already executable. 
+				error "FFMPEG is required for ffm to function.\nThe ffmpeg executable (${fullpathtoffmpeg}) is not executable."
+			fi
+		else
+			error "FFMPEG is required for ffm to function.\nThe ffmpeg executable (/usr/bin/which \"${FFMPEG}\" = \"${fullpathtoffmpeg}\") does not exist."
+		fi
+	fi
+}
+
+function generate_outfilename
+{
+	local outfilename="${1}"
+	#echo -n "\n------------------\n${outfilename}\n------------------\n"
+
+	if [[ -d "${outfilename}" ]]
+	then
+		## outfile passed in is a directory, so outfile is <outfile>/<infile basename>.mkv
+		outfilename="${1:a}/${foptions[IN_FILE_NAME]:t:r}.mkv"
+	fi
+
+	#local fileextension="${outfilename:e}"
+	local  fileextension=mkv
+	local outfilebasename="${outfilename:r}"
+	local count=1
+
+	## now, so long as the specified/generated outfilename already exists, add a counter
+	## to the filename until it's unique. We don't bother with a sanity check here. If 
+	## there are already 400,000,000 files identically named files (with counter), this
+	## loop will take a while. FTW.
+	while [[ -e ${outfilename} ]]
+	do
+		outfilename="${outfilebasename}.(${count}).${fileextension}"
+		(( count++ ))
+	done
+	echo -n "${outfilename}"
+}
+
+function add_video_filter
+{
+	foptions[VF_OPTION]="-filter:v"
+	if [[ ! -n "$foptions[VF_VALUE]" ]]
+	then
+		foptions[VF_VALUE]="${1}"
+	else
+		foptions[VF_VALUE]="$foptions[VF_VALUE],${1}"
+	fi
+}
+
+function no-op
+{
+	## does nothing
+}
+
+local FFMPEG=ffmpeg
+local FFPROBE=ffprobe
+local QUIET=
+local DELETE=
+local CODEC=HEVC
+
+# Input and Output foptions array is associative
+# This is an array of options which will apply to either the input file to FFM
+# or to the output. The resulting ffmpeg command will be structured like this:
+#
+#		ffmpeg <input foptions here> <input file name> <output foptions here> <output file name>
+#
+# As an associative arrays, the resulting foptions will be in hash order which
+# will certainly be unhelpful. To ensure that the foptions are placed in the "correct"
+# order (the order ffmpeg requires them to be in), two additional arrays ikeys and 
+# okeys (input keys and output keys) will contain key names in the necessary order.
+# Any options which have a key in ikeys or okeys but which doesn't have a corresponding
+# value in foptions will be omitted from the final ffmpeg command.
+local -a ikeys
+local -a okeys
+local -A foptions
+# keys.in the order they should appear in the ffmpeg command line
+# NOTE TO SELF: MAKE SURE NOT TO USE COMMAS TO SEPARATE VALUE HERE.
+ikeys=(NO_BANNER NO_STDIN
+	START_OPTION START_VALUE 
+	IN_FILE IN_FILE_NAME 
+	)
+okeys=(
+	END_OPTION END_VALUE
+	VIDEO_OPTION VIDEO_VALUE 
+	BITRATE_OPTION BITRATE_VALUE CONSTANTQUALITY_OPTION CONSTANTQUALITY_VALUE PRESET_OPTION PRESET_VALUE 
+	KEYFRAMES_OPTION KEYFRAMES_VALUE
+	VF_OPTION VF_VALUE 
+	AUDIO_OPTION AUDIO_VALUE 
+	MAP_OPTION MAP_VALUE
+	OVERWRITE_OUTPUT_OPTION 
+	SUBTITLE_OPTION SUBTITLE_VALUE 
+	IGNORE_UNKNOWN 
+	OUT_FILE_NAME
+	)
+
+## SET DEFAULTS or other required foptions
+	## always set the hide banner option because the ffmpeg banner is.....horrendous, vile, heinous, again' all that is right in the world.
+	foptions[NO_BANNER]="-hide_banner"
+	# -nostdin disables ffmpeg processing stdin (keyboard or mouse) while it's doing it's thing so that any in advertent
+	# key presses won't cause ffmpeg to do something unintended while it's processing a video (which may take a long time)
+	foptions[NO_STDIN]='-nostdin'
+
+	foptions[AUDIO_OPTION]="-c:a"
+	foptions[AUDIO_VALUE]="copy"
+	foptions[MAP_OPTION]="-map"
+	foptions[MAP_VALUE]=0
+	foptions[IGNORE_UNKNOWN]="-ignore_unknown"
+
+
+
+## Check to see what command ffm was called with, and set appropriate default for certain options
+	case "${0:t}" in
+		'x264'|'xavc')
+			setAVC
+			;;
+		'xav1')
+			setAV1
+			;;
+		'ffmcp'|'ffmcpy'|'ffmcopy')
+			setCOPY
+			;;
+		*)
+			setHEVC
+			;;
+	esac
+
+
+
+
+## Constant Quality Values
+## indexes -lossless veryhigh high average low verylow
+local -A CRF
+CRF=(
+	[AVClossless]=0  [AVCveryhigh]=6  [AVChigh]=12  [AVCaverage]=23  [AVClow]=29  [AVCverylow]=35  [AVCpotato]=51
+	[HEVClossless]=0 [HEVCveryhigh]=7 [HEVChigh]=14 [HEVCaverage]=28 [HEVClow]=35 [HEVCverylow]=42 [HEVCpotato]=51
+	[AV1lossless]=0  [AV1veryhigh]=7  [AV1high]=15  [AV1average]=30  [AV1low]=37  [AV1verylow]=45  [AV1potato]=51
+	)
+
+## resolutions for scaling. Width from height (width is the value for the associative array, height is the key)
+local -A WIDTHS
+WIDTHS=( [4320]=7680 [2160]=3840 [1080]=1920 [720]=1280 [540]=960 [480]=854 [360]=640)
+
+while [[ "${1}" ]]
+do
+	case "${1}" in
+		'-h'|'--help')
+			usage
+			;;
+		'-ffmpeg')
+			shift
+			FFMPEG="${1}"
+			;;
+		'-nop'|'-no-op'|'-no')
+			## will do nothing when we get to the actual command at the bottom.
+			FFMPEG=no-op
+			;;
+		"-archive")
+			setARCHIVE
+			;;
+		"-archiveav1")
+			setARCHIVEAV1
+			;;
+		'-av1')
+			setAV1
+			;;
+		'-x265'|'-hevc'|'h.265')
+			setHEVC
+			;;
+		'-x264'|'-avc'|'h.264')
+			setAVC
+			;;
+		'-n265'|'-nhevc')
+			CODEC=NHEVC
+			foptions[VIDEO_VALUE]='hevc_nvenc'
+			foptions[CONSTANTQUALITY_OPTION]=
+			foptions[CONSTANTQUALITY_VALUE]=
+			foptions[PRESET_OPTION]=
+			foptions[PRESET_VALUE]=
+			;;
+		'-copy')
+			if [[ ! -n "$foptions[VF_OPTION]" ]]
+			then
+				setCOPY
+			else
+				error "Cannot use -copy when re-scaling video (-1080, -720, -540, -480) or altering the frame rate (-f24, -f25, -f30). You must use -hevc (default), -nhevc, -av1 or -avc."
+			fi
+			;;
+		'-quality')
+			shift
+			## Sets the quality value for constant quality. This option must be placed after any 
+			## option (including the default) which chooses an encoder which uses constant quality.
+			if [[ -n $foptions[CONSTANTQUALITY_VALUE] ]]
+			then
+				foptions[CONSTANTQUALITY_VALUE]=${1}
+			else
+				error "\"-quality\" must be set after choosing an encoder which support constant quality (av1, avc or hevc, the default) and is not compatible with setting the bit rate with \"-br\""
+			fi
+			;;
+		'-lossless'|'-veryhigh'|'-high'|'-average'|'-low'|'-verylow'|'-potato')
+			## Sets constant quality values (-cfr) using a preset value (not to be confused with the preset option below
+			## which affects encoding speed and not video quality)
+			## values vary depending on codec. Must have selected a codec which sets a CONSTANTQUALITY_VALUE first
+			if [[ -n $foptions[CONSTANTQUALITY_VALUE] && "${CODEC}" =~ "AVC|HEVC|AV1" ]]
+			then
+				foptions[CONSTANTQUALITY_VALUE]=$CRF[${CODEC}${1:1}]
+			else
+				error "\"$1\" must be set after choosing an encoder which support constant quality (av1, avc or hevc, the default) and is not compatible with setting the bit rate with \"-br\""
+
+			fi
+			;;	
+		'-ultrafast'|'-superfast'|'-veryfast'|'-faster'|'-fast'|'-medium'|'-slow'|'-slower'|'-veryslow')
+			## Sets the preset for constant quality. This is ignored if an option (encoder) which uses
+			## and sets a preset has not already been set. I.e. it must occure after such foptions.
+			if [[ -n $foptions[PRESET_VALUE] ]]
+			then
+				foptions[PRESET_VALUE]=${1:1}
+			fi
+			;;
+		'-s')
+			## start time
+			shift 1
+			foptions[START_OPTION]="-ss"
+			foptions[START_VALUE]="${1}"
+			;;
+		'-d')
+			## duration
+			shift 1
+			foptions[END_OPTION]="-t"
+			foptions[END_VALUE]="${1}"
+			;;
+		'-br')
+			## bit rate
+			shift
+			foptions[BITRATE_OPTION]="-b:v"
+			foptions[BITRATE_VALUE]="${1}k"
+			foptions[CONSTANTQUALITY_OPTION]=
+			foptions[CONSTANTQUALITY_VALUE]=
+			foptions[PRESET_OPTION]=
+			foptions[PRESET_VALUE]=
+			;;
+		'-trim')
+			foptions[MAP_OPTION]=
+			foptions[MAP_VALUE]=
+			;;
+		'-sub')
+			foptions[SUBTITLE_OPTION]="-c:s"
+			foptions[SUBTITLE_VALUE]="copy"
+			;;
+		'-ass')
+			foptions[SUBTITLE_OPTION]="-c:s"
+			foptions[SUBTITLE_VALUE]="ass"
+			;;
+		'-2160'|'-1080'|'-720'|'-540'|'-480'|'-360')
+			if [[ "${CODEC}" != "COPY" ]]
+			then
+				local hres=${1:1}
+				local wres=$WIDTHS[$hres]
+				add_video_filter "scale=w=${wres}:h=${hres}:force_original_aspect_ratio=decrease,crop='iw-mod(iw\,2)':'ih-mod(ih\,2)'"
+			else
+				error "Cannot rescale (the option \"${1}\") with the \"-copy\" option. You must -hevc (default), -av1, -avc or -nhevc instead."
+			fi
+			;;
+		'-f24'|'-f25'|'-f30')
+			if [[ "${CODEC}" != "COPY" ]]
+			then
+				local fps=${1:2}
+				add_video_filter "fps=${fps}"
+			else
+				error "Cannot alter framerate (the option \"${1}\") with the \"-copy\" option. You must -hevc (default), -av1, -avc or -nhevc instead."
+			fi
+			;;
+		'-y'|'-overwrite')
+			foptions[OVERWRITE_OUTPUT_OPTION]='-y'
+			;;
+		'-q'|'-quiet')
+			QUIET=QUIET
+			;;
+		'-delete')
+			DELETE=YES_REALLY_DELETE
+			;;
+		*)
+			if [[ ! "${1:0:1}" == "-" ]]
+			then
+				## options not preceeded by a "-" are the input and output files.
+				## the first one is the input / source file, and the second is the
+				## destination / target file/directory
+				if [[ -n "$foptions[IN_FILE_NAME]" ]]
+				then
+					## we have already specified the infile, so this option is the 
+					## eplicit outfile and will replace the default generated outfilename
+
+					if [[ -d "${1}" ]]
+					then
+						## outfile is a  directory, so out file name will be outfieldirectory/infilename
+						foptions[OUT_FILE_NAME]="$(generate_outfilename "${1}/${foptions[IN_FILE_NAME]:t:r}.mkv")"
+					else
+						## outfile is not a directory
+						if [[ "${1:h}/${1:t}" != "${1}" &&  -d "${FFM_DEFAULT_PATH}" ]]
+						then
+							## no path was specified on the command line, and FFM_DEFAULT_PATH is reasonably set,
+							## so we'll use FFM_DEFAULT_PATH
+							foptions[OUT_FILE_NAME]="$(generate_outfilename "${FFM_DEFAULT_PATH}/${1:t}")"
+						else
+							## a fully qualified outfile name was provided, so we do what we're told
+							foptions[OUT_FILE_NAME]="$(generate_outfilename "${1}")"
+						fi
+					fi
+				else
+					## we have not yet specified the infile, so this option is the default derived from the infile.
+					foptions[IN_FILE]='-i'
+					foptions[IN_FILE_NAME]="${1}"
+					## now generate a default outfile (in case outfile is never specified on the commandline)
+					if [[ -d "${FFM_DEFAULT_PATH}" ]]
+					then
+						## if no outfile was specified and FFM_DEFAULT_PATH is set, use FFM_DEFAULT_PATH as the, um, default path
+						foptions[OUT_FILE_NAME]="$(generate_outfilename "${FFM_DEFAULT_PATH}/${1:t:r}.mkv")"
+					else
+						## if FFM_DEFAULT_PATH is not set or isn't a directory, 
+						foptions[OUT_FILE_NAME]="$(generate_outfilename "${1:P:r}.mkv")"
+					fi
+				fi
+			else
+				error "Unknown option \"${1}\"."
+			fi
+			;;
+	esac
+	shift 1
+done
+
+if [[ ! -n "$foptions[IN_FILE_NAME]" ]]
+then
+	usage
+fi
+
+typeset -a command_line
+#command_line=("ffmpeg")
+
+for ikey in ${ikeys}
+do
+	local value="$foptions[${ikey}]"
+	#echo "IKEY $ikey => ${value}"
+	if [[ -n "${value}" ]]
+	then
+		command_line+=(${value})
+	fi
+done
+for okey in ${okeys}
+do
+	local value="$foptions[${okey}]"
+	#echo "OKEY $okey => ${value}"
+	if [[ -n "${value}" ]]
+	then
+		command_line+=(${value})
+	fi
+done
+
+###echo "INFILE : ${foptions[IN_FILE_NAME]}"
+###echo "OUTFILE: ${foptions[OUT_FILE_NAME]}"
+###exit
+
+########################################################################
+########################################################################
+### FFMPEG CALLED JUST BELOW HERE                                    ###
+### VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV ###
+check_ffmpeg
+if [[ -n ${QUIET} ]]
+then
+	## execute ffmpeg redirect all output to /dev/null
+	#echo Quiet
+	echo "$foptions[IN_FILE_NAME]"
+	${FFMPEG} ${command_line} &> /dev/null
+else
+	## execute ffmpeg normally
+	#echo Normal
+	## Check for ffmpeg. Exit if it is not present (or on the path, which amounts to the same thing)
+	echo "${FFMPEG} ${command_line}"
+	${FFMPEG} ${command_line}
+fi
+### ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ###
+### FFMPEG CALLED JUST ABOVE HERE                                    ###
+########################################################################
+########################################################################
+
+if [[ "${DELETE}" == "YES_REALLY_DELETE" ]]
+then
+	delete_original
+fi
+
+

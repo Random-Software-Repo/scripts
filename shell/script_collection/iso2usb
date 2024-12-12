@@ -1,0 +1,44 @@
+ZSHSHEBANG
+infile="${1}"
+outfile="${2}"
+
+function usage
+{
+	print "Usage:"
+	print "	iso2usb <source iso file> <target device or partition>"
+	print ""
+	print "	where <source iso file> is the path to an ISO "
+	print "	file or other image which will be written to the"
+	print "	target device."
+	print "	and <target device or partition> is a block device "
+	print "	which will be over-written."
+	exit -1
+}
+
+if [[ ! $# -eq 2 ]]
+then
+	usage
+fi
+
+## check $infile is a bootable iso file
+##		probaly doesn't need to be bootable, just an iso file.
+##		or maybe not even that.
+##		what does a non-iso image look like to file?
+file "${infile}" | grep '(bootable)'
+if [[ ! $? -eq 0 ]]
+then
+	print "Source iso file \"${infile}\" is not a bootable image. "
+	exit -2
+fi
+
+## check if $outfile is a block device
+lsblk "${outfile}"
+if [[ ! $? -eq 0 ]]
+then
+	print "Destination \"${outfile}\" is not a block device. "
+	exit -3
+fi
+
+exit 7
+##sudo /usr/bin/dd status=progress bs=4M "if=${infile}" "of=${outfile}" conv=fdatasync
+sudo /usr/bin/dd status=progress bs=4M "if=${infile}" "of=${outfile}" conv=fdatasync

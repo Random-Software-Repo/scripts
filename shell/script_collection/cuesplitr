@@ -1,0 +1,28 @@
+ZSHSHEBANG
+
+for d in **/*.flac
+do
+	if [[ -e "${d:r}.cue" ]]
+	then
+		echo ${d}
+		echo ${d:r}.cue 
+		echo ${d:h}
+		cd "${d:h}"
+		echo "${d:t}"		
+		echo "${d:t:r}.cue"
+		
+		if [[ -e "${d:t}" ]]
+		then
+			if [[ -e "${d:t:r}.cue" ]]
+			then
+				shnsplit -f "${d:t:r}.cue" -t '%n-%t' -o flac "${d:t}" 
+				mv "${d:t}" "${d:t}.original"
+			fi
+		fi
+		cd -
+		echo .
+		
+	fi
+
+
+done

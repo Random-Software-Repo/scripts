@@ -1,0 +1,68 @@
+ZSHSHEBANG
+### Splits a single FLAC file into individual tracks according to CUE file
+function usage
+{
+	echo "cuesplit"
+	echo "	Splits a single FLAC file into individual tracks specified in"
+	echo "	a CUE file. Cuesplit requires the external tools cuetag (from "
+	echo "	cuetools), shnsplt (from shntool), and flac."
+	echo ""
+	echo "usage:"
+	echo "	cuesplit <flac file> [<cue file>]"
+	echo "	"
+	echo "	<flac file> is a single .flac formatted file containing the audio."
+	echo "	<cue file> is a single .cue file containing the track information."
+	echo "		if <cue file> is omitted, cuesplit will search for a cue file"
+	echo "		using the <flac file> name replacing the file extension with"
+	echo "		.cue or, if that is not found, by simply appending .cue to the"
+	echo "		flac file name."
+	echo "	"
+	exit 0
+}
+
+## requires cuetools (cuetag script) and shntool (shnsplit) and flac
+
+	if [[ "$#" == 0 ]]
+	then
+		usage
+	fi
+	
+	## $1 = flac file
+	local flacfile="${1}"
+	local cuefile=
+	if [ "${2}" ]
+	then
+		cuefile="${2}"
+	else
+		# if no cue file was specified on the command line,
+		# try to find the cue file by 1) replacing .flac with .cue
+		# or 2) appending .cue to the flac file name.
+		local cuefiletest="${flacfile:r}.cue"
+		if [ -e "${cuefiletest}" ]
+		then
+			cuefile="${cuefiletest}"
+		else
+			cuefiletest="${flacfile}.cue"
+			if [ -e "${cuefiletest}" ]
+			then
+				cuefile="${cuefiletest}"
+			else
+				usage
+			fi
+		fi
+	fi
+	## $2 = cue file
+	echo flacfile: ${flacfile}
+	echo cuefile : ${cuefile}
+	if [ -e "${flacfile}" ]
+	then
+		if [ -e "${cuefile}" ]
+		then
+			shnsplit -f "${cuefile}" -t '%n-%t' -o flac "${flacfile}"
+			cuetag "${cuefile}" [0-9]*.flac
+		else
+			echo Cue file \"${cuefile}\" does not exist.
+		fi
+	else
+		echo Flac file \"${flacfile}\" does not exist.
+	fi

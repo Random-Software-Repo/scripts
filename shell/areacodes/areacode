@@ -1,0 +1,11 @@
+ZSHSHEBANG
+	##Find the areadcodes database
+	database="${0:h}/../share/areacodes/areacodes"
+	if [[ ! -e "${database}" ]]
+	then
+		echo "no areacode database found in \"$database\""
+		database="/usr/local/share/areacodes/areacodes"
+	fi
+	#echo "using \"${database}\""
+	grep -i "$1" "${database}"
+	

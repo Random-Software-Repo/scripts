@@ -1,0 +1,701 @@
+ZSHSHEBANG
+SLEEP=0.01
+
+function 	slowprint()
+{
+	sleep $SLEEP
+	print "${1}"
+}
+function frame00
+{
+	slowprint '                                                $   $  $   $'
+	slowprint '                                                 "o  $ $  o""'
+	slowprint '                                                   o  "   "ooooo'
+	slowprint '                                               oo ""           o$'
+	slowprint '                                 o            o            oo  "'
+	slowprint '                                $$             $o$""$o  ooo$'
+	slowprint '                                $"$          o $    "$  $'
+	slowprint '                      o$o       $ "$         $ $     $ $'
+	slowprint '                       $$$o     $$ "$       o$ $     o $o'
+	slowprint '                       "$ ""o   "$   "o     $$ "o     o"'
+	slowprint '                   $o   $$   "o  $     "oo  $"  $   o$"'
+	slowprint '                    "$   $o    "o$$       "o$    $o$" oo$'
+	slowprint '                      "o "$o                     "$o $"$$'
+	slowprint '                        "        oo$$$$$$$oo        $oo$$""      o" o'
+	slowprint '               """""""""      o$$$$$$$$$$$"$o             o"""$o$$  o$'
+	slowprint '                     ooo$$$"o$$$$$$$$$$$$$$ "$o    o   o$$$o   $ $ o$'
+	slowprint '                  o$$$$$$$$$$$$$$$$$$$$$$$$    "oo  o      ""o  "$ $'
+	slowprint '                 $$$$$$$$$$$$$$$$$$$$$$$$$$      "$o   o$$"""$     " oo""o'
+	slowprint '              o""""$$$$$$$$$$$$$$$$$$$$$$"         ""$o"$o          "   o$'
+	slowprint '                   "$$$$$$$$""""$""$$$""              "$oo$""$o     o$"""'
+	slowprint '                    $$$$$$$"                           $""""$"  o""""'
+	slowprint '                     $"""""$ooooo        ooooo$$$$$$$     o$" o"'
+	slowprint '                      $     """" oooo$$$$$$$$$$$$$$"     $"  o"'
+	slowprint '                    oo$   oooo$$$$$$$$$$$"""""$$$$"    o$" o$"'
+	slowprint '                  "$ $o$$$$$$$$$$$$$""$     o$$$"oooo$"  o"'
+	slowprint '                    "o$ "$$$$$$$$$$$$         $$o$"$$$   $"'
+	slowprint '                      "$  ""$$$$$$$$$        o$"$$$ "$$o$$'
+	slowprint '                        "o   ""$$$$$$o     o$$$$ ""$o """$'
+	slowprint '                          "$o    ""$$$$$$o"  o$$$$oo o$$$$'
+	slowprint '                             ""$oo     $$" "$$$"" ooooooo$'
+	slowprint '                                  """"$"  o$"   oo$$$$$""$$'
+	slowprint '                                     $ oo$"  o$$$$$""  ooo$'
+	slowprint '                                     $o$"  o$$$$"  oo$$$$$$$o'
+	slowprint '                                      $$ o$$$"  o$$$$$$"""""$o'
+	slowprint '                                       "o$$"  o$$$$""  o$$$$$$$o'
+	slowprint '                                         "$oo$$$$"  o$$$$$""" o$o'
+	slowprint '                                           "$$$" oo$$$"" oo$$$$$$$'
+	slowprint '                                        ooooo$oo$$$"" oo$$$$"""$$""'
+	slowprint '                                       $"oooo $$$" o$$$$""      $'
+	slowprint '                                     o$"o$   $$"oo$$""       " o$'
+	slowprint '                                     $ o$$o  $$o$$"          oo$$'
+	slowprint '                                     $ $$$$  $$$$$$$$$$$$$$$$$$$$'
+	slowprint '                                     $ $$$$  $$$$$$$$$$$$$$$$$$$$"'
+	slowprint '                                     $ $$$$  $$$$$$$$$$$$$$$$$$$$'
+	slowprint '                                     $ ""    ""$$$$$$$$$"""$""""'
+	slowprint '                                     $o         $"$"    " $"'
+	slowprint '                                      $o       $$  $o    o$'
+	slowprint '                                       "$o   o$$    ""$$$"'
+	slowprint '                                         """"""'
+
+}
+function frame01
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                             MMMM                                                   "
+	slowprint "                              BZ             S  MM@                                                 "
+	slowprint "                             MMMMMMa         M\;  7MM\;          @i                                 "
+	slowprint "                             iMMMXiMMMW     XMX ,  WMM       XMM\;                                  "
+	slowprint "                               MMS  i0MMMM  0Mi ::   MM     MMM                                     "
+	slowprint "                                MMM       MMMMM.:ii:  ,Mr  MM,  MM                                  "
+	slowprint "                   MMMMMMMMMMMMMMMMMM i::  . ,\;::iiii:  8\;.a,  M                                  "
+	slowprint "               MMMMa2.             i  iiii,    ,:iiiiii,,:,.., 7MMMM                                "
+	slowprint "               WMMMMM      :iiiii:..,iiiiiiiiiiiiiiiiiiiiiiiii,                                     "
+	slowprint "                   :BMMMMMi:iiiiii:.   :i\;rr777777777rr\;iiiiiii:.MMMM                             "
+	slowprint "                           :iiii:   MMM.i7             \;iri::ii.                                   "
+	slowprint "                   0MMM82,ii\;\;\;\;iZMMWSr   .,,,,,,,,,,,..  \;Xi:i MW              MMS            "
+	slowprint "             ,MMMMMM7   .i\;7:::.       .,,,,                .   M@      MM0M WM8 .MM               "
+	slowprint "           \;MMM@           . ...,,,,,,,,,         2MMM .i i     MZ      M  MMM  ZM                 "
+	slowprint "           a8r        MMM, ,,,,,,,,,,,,   7MMMMMMMMMMMMMMMMMMMMMMM  i   M   M  \;MMMMMM             "
+	slowprint "                  SaMMMM  .,,,,,,,..    ,MMMMMMMMMMMMMM    :i,0ZMMMMMMM  M            M:            "
+	slowprint "               @MMMMMM   ,,,,,.         MMMMMMMMMMMMMMM         SM7   aMM      \;i8MMMMM            "
+	slowprint "              WMM.   M  ,,,.     80MMMMMMMMM0. MMMMMMMM  ,,,,,,        M  MMM,  Mr  B7              "
+	slowprint "                     M  ,,   8MMMMMMMMMMMMMMZ   aMMMMMMM ,,,,,,,,,,,   MMM  0M  MM                  "
+	slowprint "                    MMM ,  iMMMMMMMMMMMMMMMMMMr WMMWiMMi ,,,,,,,,,.   MM     SZMM                   "
+	slowprint "                  MMM0M   8MMMMMMMMMMMMMMMMMM      aMM      .,      MM8                             "
+	slowprint "                      MX  MMMMMM   MMMMMMM 0MMMMMMMM   :MMM..  MMMMMM                               "
+	slowprint "                       MZMMMMMMMM   MMMMM      MM,       M\; . 7MMMM                                "
+	slowprint "                       BMMM0@MMMBS    rMM  ,,.  MW ,,,  M   . MMMMMMMM                              "
+	slowprint "                         MM   MMM8  7MMM2       MM ,.  ,M ,,  MMMMMMMM                              "
+	slowprint "                        MM2MMS  7MMMMM  MMMMaMMM8     XM  ,  WMMMM                                  "
+	slowprint "                        M0  ZMM           .MMMM      BMM ,. MMMMMX                                  "
+	slowprint "                         ZM7MMM: .,,,.            MMM2.  ,  MMM2                                    "
+	slowprint "                             MMZ      ,M0000BXMMMMM        WMM@                                     "
+	slowprint "                              MMMM        .rSi        .  i0MMM@.             MMMMZMMM               "
+	slowprint "                                SMMMMMMMMMMMMMMMMMMMMMMMMMMrMMMMM    ,  aMMMMM      MM0             "
+	slowprint "                                rMX                         MMM   ii:  \;2:.     MM8,MM             "
+	slowprint "                                MM          ..          ..  MM      a0\;         :8MMa              "
+	slowprint "                               MM  ....................... MMMMMMMMMMMMMM M   MM   MM               "
+	slowprint "                               .M2 ....................... MM             M   MMM\;iMM              "
+	slowprint "                     MMMMMX     MM  .....                  M              WMMBM .MMMS               "
+	slowprint "               MMMMMMM    M.    ZMX ..... MMMMMMMMMMMMMMMZ M                M                       "
+	slowprint "           MMMMM   M      M2    MM. .....           ... a MMMW                                      "
+	slowprint "           M  :a.ii:  ,  XM    MMW  .............       M                                           "
+	slowprint "          MMB  aMMMM ,,  M    BM,   .................   M                                           "
+	slowprint "          Ma7MM\;     ,,  MMMMZMM            .........  7M                                          "
+	slowprint "          MMS8   ,,,,,.  MBMMMMMMMMMMMWMBW      .....  MM                                           "
+	slowprint "                ,,,,,,,7,  @X   r    i00BWMMM          M                                            "
+	slowprint "                ,,,,,,. BM  M:   \;M2        MMMM   :M 8M                                           "
+	slowprint "             MW .,,,,,,  Mr MMai,   S  , ..    MMMM   M                                             "
+	slowprint "             MM  .,,,,,  MMM22WMMMMMMM   ....    ZMMMM0                                             "
+	slowprint "              MM    .,.  SM          MM  ......     MM                                              "
+	slowprint "               MMM       MM           M    ....      M                                              "
+	slowprint "                 MMMMMMMMM       MMMMMM             BMM,MMMMMMMMM8@MMMMMM                           "
+	slowprint "                    WMMM        MM    MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM2 .                           "
+	slowprint "                                .M      :SrMMMM0i\;.   MM  MM MM                                    "
+	slowprint "               MMMMMMMMMMMMMMMMMMMMMMSZ72             MMM MMMM                                      "
+	slowprint "                282BMMMMMMMMMMMMMMMMMMMMMr  .WM0SMMMMMM2                                            "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+}
+
+function frame02
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                              .                                                                     "
+	slowprint "                             MMMMMM         MMMMS                                                   "
+	slowprint "                             MMi  MMZ       MrrMM                                                   "
+	slowprint "                              MZ    8MW    8M   MMM                                                 "
+	slowprint "              ,MMMMMMMMM\;     0M   .  BMMM MM    ,MM    M                                          "
+	slowprint "                MM      MMMMMWMMMM ii,   MMMMM0.,  8Mi  MW                                          "
+	slowprint "                 XMM  ..    .\;:a8. iiiii.    \;..ii,  MM  M                                        "
+	slowprint "                   WMM    ,,     .,iiiiiii,   .:iii:.  @  MMMMM,                                    "
+	slowprint "                      MMM::iiiii::iiiiiiiiiiiiiiiiiiii,,,. ,    i,                                  "
+	slowprint "                :X0BM  :7 :iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:, MMMM2                                  "
+	slowprint "        MMMMMMMMii:..,,..,:,.   ,i\;rrrrrrrrrrr\;iiiiiiiiiiiii                                      "
+	slowprint "                ,iiii\;\;\;r\;:r\;:M@7S: ......... i\;iiii:..,iiiiii,MMMM                           "
+	slowprint "         rii:.     \;\;,:::  MMM.    ............ ,\;iiiaM.iiii                                     "
+	slowprint "            ,S8XMMi   ....     ..,,,,,,,,,,,,,,.:\;ii:.:.iiii MMM                                   "
+	slowprint "        rMMMr\;iMM2\;:.,,,,,,,,,,,,,,,,,,      .   ,\;iiiiiiii  M:                                  "
+	slowprint "               8M   .,,,,,,,.           ZMM                 M\;                                     "
+	slowprint "               MM .,,,,,,     XMMMMMMMMMr:MMMMMMMMBBMMMMMMMMM                                       "
+	slowprint "               MM .,,,,.  :0MMMMMMMMMM     ri   MMMMMMM00MMMMMM.                                    "
+	slowprint "               @@        MMMMMMMMMMMMM  ..    .    iM     8a  M7                                    "
+	slowprint "               XMMMMMMMMMMMMMMMMMMMMMM    .,,,,,.   i  ..     Mi                                    "
+	slowprint "               WMMMMMMMMMMMMMMZr0MMMMMMMM   ,,,,. ,MM ,,,,,.  Mr                                    "
+	slowprint "             MMMMMMMMMMMMMMMMM    MMMMMMM , .,,,..aMM ,,.    MMr                                    "
+	slowprint "              MMMMMMMMMMMMMMMMM   SMMMMMMMM.       MM      MMM                                      "
+	slowprint "              \;MMMZ  MMMMMMMMMMMM 8MMM8 M    MMMMMM\;   MMMMMX                                     "
+	slowprint "              8MMMMM  ,MMW     aMMMM   MM   ,WX.     \;MM                                           "
+	slowprint "            2M8  @MMMB MM             MM   \;M        XM                                            "
+	slowprint "           .MZ    0MMMM8MMr    MM,   MM    MMMM2:                    r\;i                           "
+	slowprint "          MMZ   MMX M:   2MMMMMMX   MM    MSS8@@MMMMMM           MMZMMMMMMMMM                       "
+	slowprint "          MM     SMSMM             MM:   MM         XMMMM8    @MW2MMM    M  MMM                     "
+	slowprint "          MM8       MMMMX         aMM    M   .....       MM  MM      ,..      MMX                   "
+	slowprint "           .MMMMa MMMMMMMMMMMMMMWMMM    MM  ..........   7M  8MM      .,,,,   MM                    "
+	slowprint "                ZMMMMMMMMMMMMrWMM  MMM  M   ...........   M    MMMMM  ,,,,,,   MM@                  "
+	slowprint "                MMMMMMMMMMMMM  :MMMM@ 2MMM  ..........   M        MMr ,,,,,, MMMMX                  "
+	slowprint "              MMMMMMMMMMMMMMMMMM8   MMMMB7.   ........ .MM       . 8M ,,,,,,    MM                  "
+	slowprint "                     MMMMMMMMB       2Xa:,MM2,........   rMMB 7MB  BM ,,,,,,,,   MM                 "
+	slowprint "                          77\;MM               .........    rMMM:  ,MW ,,,,,,,,,. WM                "
+	slowprint "                              MMM   ..................      WMMMMMMM    ,,,,,,,, rMM                "
+	slowprint "                               MMM  ................    Z    MS    XMM@  ,,,,,,, 7MM                "
+	slowprint "                                 M    ............    8 MMMM        MMM@    ,,.  08                 "
+	slowprint "                                 XMM   ...........   MMMM            MMMMXX     MM:                 "
+	slowprint "                                   MMM   ........  rMM,    ... 7MMMMr ,  MMMMMMMM,                  "
+	slowprint "                                     MM0      ..   MW   ...... iMMMMM                               "
+	slowprint "                                      rMMM        MM  ........    8MM                               "
+	slowprint "                                         MMMM    @M0 ...........   :MM                              "
+	slowprint "                                            MMMMMMW   ...........   MMMi                            "
+	slowprint "                                              MMMMMMa             :MMM2MMM                          "
+	slowprint "                                              ZM\;  0MMMMWM     \;@MMM.   MM                        "
+	slowprint "                          XBMMMMMMMM0          aMM\;     \;MMMMMMMMi    0MMMMM80                    "
+	slowprint "                      @MMMMMMMMMMMMMMMM0MMMMMMMMMMMMMZ0          aM   SMM\;MMMMMMMMMM.              "
+	slowprint "                                  SrrraBMMMM@W8S7rr7aBMMMMMZZ882MMMMMMZ                             "
+}
+
+function frame03
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                       0                                                            "
+	slowprint "                                     aMMM        8MMMMM                                             "
+	slowprint "                                    MM  M      MMM\; MM                                             "
+	slowprint "                                   MM  MM   rMMr   SM                                               "
+	slowprint "                          M8      MM    M  MM8  , iM@                                               "
+	slowprint "                         MMM8    MM  ::MMWMM  .:i 2M    XMMMM,                                      "
+	slowprint "                        :M MMa  @M  i:  MM\;  :iii BM  MMM,:                                        "
+	slowprint "                        M   MM ZMM iii: 0Z .iiiii :MMM@   :2                                        "
+	slowprint "                        M .  MMM8  iiii.  .iiiiii:     .ii:   \;.                                   "
+	slowprint "                       8M .i  0MZ iiiiiiiiiiiiiiii::iiiii:iMMM2                                     "
+	slowprint "                   a:  MM .i:    .iiiiiiiiiiiiiiiiiiiiiii:r                                         "
+	slowprint "                  WM \; MM ,iiiiiiiiiiiiiiiiiiiiiiiiiiiiii::.                                       "
+	slowprint "                  XM : .M ,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii.MM8                                     "
+	slowprint "                  iM  ,   :iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii. Mr r         . M i8B                   "
+	slowprint "                  :MM iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii  MMMB          8MM8MMM                 "
+	slowprint "                S7 ,M iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii MMMMMMMMM   M   M   MM                 "
+	slowprint "              rX,MM   ii::::iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii 7MMMi   MM  WM  M  22                  "
+	slowprint "              .: ia :ii     ,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii. MMM2   iM8M@MM   aMMMMM               "
+	slowprint "              0S   ,iii MMM2,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii         MMM  M   a   0M               "
+	slowprint "              \;M0   iii M . ,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\;    2MM MM i     7SX              "
+	slowprint "             7WMMMM iii M  ,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii\; MMM8   M8   .MMM\;                "
+	slowprint "            \;       iii...iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii SM2  M   B0MS                     "
+	slowprint "             MMM:     .iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii XMMMMM ,MM                         "
+	slowprint "                MMM  M  .,iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:  2MMMMMM\;                          "
+	slowprint "               BMM ,MMMZS    :iiiiiiiiiiiiiiii.   ,iiiiiiiiii.  S:XMMMM                             "
+	slowprint "                  MMW  r @Ma  :iiiii:,,:.   ,. MMZ,,iiiiiiii, 0MMMMMMM.M                            "
+	slowprint "                 rMM    MMMMZ  ,iiii\; 2  MM  Xa  8M .         MMMMM  7 Mi                          "
+	slowprint "                      MM: 0MMMa.:  ,\;:MMMMMMM8a:    ,rMMMMMMMMMMMMMMMM7ZM                          "
+	slowprint "                      MM   7MMi   r             XMMMMMMMW M@WBMMMMMB\;                              "
+	slowprint "                      WMS       MMMMMMMMM 7:,iMMMr             8Ma                                  "
+	slowprint "                       2MMMMMMMMMM     @MMBMMM0      ........   \;8                                 "
+	slowprint "                                       MM        .............    WW                                "
+	slowprint "                                      MM  ......................  .MM                               "
+	slowprint "                                      M   ...................       WM                              "
+	slowprint "                                    .M\;    .................. M0     .8 7                          "
+	slowprint "                                    M8               ........ Ma : .    @Ma                         "
+	slowprint "                                  MMM .XMM7MMMMW2         ... MM      ZWMM 7MMZ                     "
+	slowprint "                                WMMMMMMMM  X:i:SMMMMMM     .  MS  .iWMM8 M2M  M, MMM                "
+	slowprint "                           7MMMMM\;       X.S \;SW@i  :MMMMB    MMM\;0MMMMZ  MM  MMMB iMM           "
+	slowprint "                          MMM0                       ,MMMMM,  Mr       Mr,        MMM7              "
+	slowprint "                         MM7     ..................    .0MMMZM8         \;.MM2    .S.:MM            "
+	slowprint "                        MMM    .....................      BMMM              BMMMMX  XMM             "
+	slowprint "                        MM   ...........................    MM                   iMMr               "
+	slowprint "                        MMM   ............................  MM                                      "
+	slowprint "                         MM2     ............           ...  MM,                                    "
+	slowprint "                          XMMr                       iM ...  MM                                     "
+	slowprint "                            SMMM   W..    B@BaMMMMMi         MMMMW                                  "
+	slowprint "                              @MMMMS SMMMM7MMMMMMMMMMM  :a       MMMi                               "
+	slowprint "                            0MMMMMMMMMMMMMMB   MMMMMMMMMMM7\;.   a2  XMM                            "
+	slowprint "                           MM                MMMM          .,,       7M ....,:2,                    "
+	slowprint "                           M                MM     ,,,,,.  ,:i MMMMMMMMMMMMMMMMM                    "
+	slowprint "                rMMMMMMMMMMMMMMMMMMMMMMMMMr @M            0    S87rrrrrrrrrrX,                      "
+	slowprint "                              rM@@@@@MM      XMMMMMMMMMMMMa                                         "
+}
+
+function frame04
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                           r                                                        "
+	slowprint "                                         MMM           8MZ                                          "
+	slowprint "                                        MMMM       .MMMMM                                           "
+	slowprint "                                       MM@MM     aMMM  MM         XMMMMM                            "
+	slowprint "                                      MM\; MM   MMMr    M    MMMMMMZ  MMM                           "
+	slowprint "                                     aM   MMa\;MM2  ,,:MM  MMMM      2MM                            "
+	slowprint "                              M@    rM  : MMMMW  .ii,iMMMMr.   :i, \;MM                             "
+	slowprint "                              MM    MM ,i  B0M, :iii:  M:  .,iiii rMM                               "
+	slowprint "                              MM 7ZMM  iii.    ,iiiii:   .iiiiiii aMM       .                       "
+	slowprint "                             BMS    7 :iiiiiiiiiiiiiiiiiiiiiiiiii,  MMMMMMMMMM\;                    "
+	slowprint "                         :MM @MMM :,,,iiiiiiiiiiiiiiiiiiiiiiiiiiii:                                 "
+	slowprint "                        8 rX,  .  iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii,   .\;\;Xi                    "
+	slowprint "                            .,..,:iiiiiiiiiiiiiiiiiii:,   ,iii\;\;r\;,   :MMXMMM8                   "
+	slowprint "                      2 7MM2,iiiiiiiiiiiiiiiiiiiiiiii\;0,MM,iii\;,  raaa7MM                         "
+	slowprint "                      MMMS7  :iiiiiiiiiiiiiiiiii\;rr7\;,8        ...ZMWW@2MMMMMM.                   "
+	slowprint "                           r  ,iii:   .iiiiiii\;ii.      ,,,,,,,,,       MM    ar                   "
+	slowprint "                        MMMMMr ,i: .MM iiii\;\;r:  .,,,,,,,,,,,,,,,,,,,,.  M                        "
+	slowprint "                            MM,   :@MS                         .,,,,,,.  MZ                         "
+	slowprint "                             M8                      7MMMMi              MM7                        "
+	slowprint "                              MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMi M0                          "
+	slowprint "                            MMM@WMMW0,iM@@@@W@i.:\;BMMMMMMMMMMMMMMMMMMMMMMM                         "
+	slowprint "                           M7                      MMMMMMMMMMMMMMMMMMMMMMMM                         "
+	slowprint "                           M   .,,,,,,,,,    .,,, :MMMMM   MMMMMMMMMMMMMMMM                         "
+	slowprint "                           MM7    .,,,,,, Sa  ,,, rMMMMM   MMMMMMMMMMMMMMM                          "
+	slowprint "                            MMMMM   :,,,, MM  ,,,  aMMMM   MMM.   MMMMMMMr                          "
+	slowprint "                          MMMS  MMM     , iM  .,,.   MMMMMMMM        MMM                            "
+	slowprint "                        MMM         :MM    M0  ,,,,.     M,    .,,, ,MMMBMMMMMMMa                   "
+	slowprint "                       M8     .....     MMM M               MM       M           7MM                "
+	slowprint "                     MMi   ............    7MMMMMZMB7        MMMMMMMMMMMMMMS7X    WM                "
+	slowprint "                    @M   .................       iSMMMMMM                   MM\; , MMMMS            "
+	slowprint "                   MM   .......................        MMMMZWX,7          MMMM         MM           "
+	slowprint "                  8M   ............................   .MWMMMMa ,          M   7MM  MM. MM           "
+	slowprint "                 rMM  ........           .........   @MM     7WMBMMMMM    M MMMXMM iMM              "
+	slowprint "                 aM  ......    ,72MMZX         ..   MM,iMMMB80.     \;MMM         8SBMM             "
+	slowprint "                 MM  ......       iXMMMMMMM        MM         MMS .   \;M                           "
+	slowprint "                iMM ....... 2WMMMMM        \;MMMMB\;MM           M2  ,.  M                          "
+	slowprint "                WMM  ......           B\;MMMMMM: ZMMM          MMMi     MM                          "
+	slowprint "                iMM  ...............  M8Xi    MX   \;.        MM  iB       M                        "
+	slowprint "                  MM  ..............           M@             MMMMM0iMMWM@M                         "
+	slowprint "                  7M\;  ......................   MM                WM 2M ..                         "
+	slowprint "                   \;M\;  ...........              XMi                \;@                           "
+	slowprint "                     MM   .....       0MiXrX rr8a XMM                                               "
+	slowprint "                      MM          :MMM0MiX   rr80MMSZMMMX                                           "
+	slowprint "                       MMM:   iMMMM.       .       W   XMMMM                                        "
+	slowprint "                      M MWZ  MMB     ....... 2X        Zr,MM0                                       "
+	slowprint "                      M  8MMMMM   .......... aMMMM8         M                                       "
+	slowprint "                     \;    7MMMMX    ........    aMM  .....  M                                      "
+	slowprint "                     ,S ,   MMMMM\;   .........    MM  ...   Mr                                     "
+	slowprint "                     XM ,,. ,MMMMMMM ...........    7     2MM                                       "
+	slowprint "                      M  ,,   8MMZ    ...........  8MMMMMM                                          "
+	slowprint "                      M\;  .,.   8MM8                 r                                             "
+	slowprint "                       MM     MM  WMMMMMXM:78MMMMMB                                                 "
+	slowprint "                         M    BMa SB     MMM:                                                       "
+	slowprint "             MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM@MMMMMMMMMMMMMMMMMMMX                                  "
+	slowprint "             \;ZXrrrrrr\;7        :7777rrrrrr27,                                                    "
+}
+
+function frame05
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                         MM:                                        "
+	slowprint "                      MMMMX                            MMMM                                         "
+	slowprint "                      M\; 8MM2                        2MM  M             X                          "
+	slowprint "                      MM    MMMMMMMMM              :MM:   M        ZMMMMM                           "
+	slowprint "                    MMWBMM          .MX           MMB  , MM    SMMM,   MM                           "
+	slowprint "                   ZMW              7M    MS    MMM  .ii Mr  MMM   ,..MM                            "
+	slowprint "                    88MMMMMMM\;  MMMM     M\; \; rMM.  :iii MMMMi   ::  iM                          "
+	slowprint "                             MW     WM. @M .\;,MX  ,iiiii WM   ,iii. MM                             "
+	slowprint "                             Ma  S,  MM M  :i.  ,iiiiiii.   :iiiii \;M\;                            "
+	slowprint "                             SMB 0MM  Z   ,iiiiiiiiiiiiiiiiiiiiiii.0MMMMMMMM7                       "
+	slowprint "                              MM aMZ i:,iiiiiiiiiiiiiiiiiiiiiiiiii.    ..,::MMMMMMM                 "
+	slowprint "                              MM XM  iiiiiiiiiiiiii\;\;\;\;\;\;\;i:::i,       ....                  "
+	slowprint "                              MM  MM iiiiiiiiiii\;r\;:iiiiii:Xai7\;MMMMMM,\;ii:,                    "
+	slowprint "                              BM\;  M       :iii\;:..        ,. .    .:r rrr.\;,M                   "
+	slowprint "                         MMMMMMMM2MM@MMMMW    :. .,,,,,,,,,...,...         MMMMMMMMM.               "
+	slowprint "                         MM   ,:MMMMMr  MMM  .    ...,,,,,,,,,,,,,,,,,,,,,    M    .MMr             "
+	slowprint "                         MM             MMMMMMMM.       ,,,,,,,,,,,,,,,,,,,,. Mi                    "
+	slowprint "                         MM   ......... MM .0MMMMMMMa:           .,,,,,,,,,,, M                     "
+	slowprint "                         aMa  ......... M0       ZMMMMMMMMMM        ,,,,,,,,. MMa7:                 "
+	slowprint "                          MM  ......... M   ,.       iMMMMMMMMMMMM    ,,,,,,  M\; M8                "
+	slowprint "                          MM  ......... M8  ,,,,,,.   MMMMMMMMMMMMMM         ,,                     "
+	slowprint "                          MM   ........ MM .,,,,,,,   MMMMMMMMMMMMMMMMMMMMZ  8                      "
+	slowprint "                          0M,  ........ M  .,,,,,,,:i0MMMM@  MMMMMMMMMMMMMMMMM2                     "
+	slowprint "                          2MW  ........ M        ,,  .MMMM0  MMMMMMMMMMMMMMMMMMM8                   "
+	slowprint "                           M2  ........ MB  MMM, .,,  :MMM   MMMMMMMMMMX  MMMMMMMr                  "
+	slowprint "                           MM\; ........ ZM  2MMX  ,,.   MMMa MMMMMMMMMM:  MMMMMM                   "
+	slowprint "                           MMi ........  M   MMM\;  .,,.   i7XXMi      iM  MMMM0                    "
+	slowprint "                        a0MMM  ........  M   MMMMr   .,,.          .   2M MMMM                      "
+	slowprint "                       MMMMM:  ........  M   MM  MMW   .,,,,, MMM      MMMMM                        "
+	slowprint "                      MMa  MM: ......... M   :MM  ,MMB     ,,  2MMMMMMMM  MM                        "
+	slowprint "                     MM    MMr ......... M     :MMMMMMMMW,         MMM    Ma                        "
+	slowprint "                     M   .     ......... MMMMMMMM        MMMMMMMMMMS   .MMM.                        "
+	slowprint "                    MM  ..   ........... iM@0    \;MMMMMMW       \;  0MMMM:                         "
+	slowprint "                    M  .................        MM     :MMMMMMMM7 MM                                "
+	slowprint "                    M  ..................     BMM                                                   "
+	slowprint "                  :MW ............           MM                                                     "
+	slowprint "                  XM  ............  r:,,,i  MM                                                      "
+	slowprint "                  rM  ........      MMMMMM8MMMM                                                     "
+	slowprint "                  rM  .......   SWa:7         MMM                                                   "
+	slowprint "                   @M  ...... MMMWX      MMMMMMMMMMW                                                "
+	slowprint "                    Ma   ....      .MMiMM         MMMM2MWW                                          "
+	slowprint "                    XMM   ..    0MZ ,.      BMMMM   MMM  MMMMMX                                     "
+	slowprint "                     8MM     BMM0      ....    iBMMMMrXMMMM7rSMMMM                                  "
+	slowprint "                       MMMMMMW     ..........      MMMa          MMM                                "
+	slowprint "                          MMMM.        ..........  MMMM@ ......   MM                                "
+	slowprint "                              MMMMMMM: .........    MZ            MZ                                "
+	slowprint "                          MMMM                     0MB      :iMMMMMMMMM2  @\;                       "
+	slowprint "                         MM0   2MMMMMMX r    ZMMMMMZi,ZMMMMMMM@X  aM0  MMMMMMMZ,                    "
+	slowprint "                :,...,Z\;MM.        MMMMMMMMMMM.    8WW  WM         :Mi0@Z                          "
+	slowprint "              MMMMMMMMMMMMM                    @MMM  @MSMMMMMMMMMSMMMMM:                            "
+	slowprint "                27rrrrrr77ZMMMMMMMMMMMMM,\;i       MMir@                                            "
+	slowprint "                                            MMMMM                                                   "
+}
+
+function frame06
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                         M2         7                                               "
+	slowprint "                                         7MM       WMM                                              "
+	slowprint "                                           WMM,      MW      MM                                     "
+	slowprint "                                    ,M       MM,     rM     MMMM7                                   "
+	slowprint "                                     MBMM    ,MMM@,\;i  M    MM @MW                                 "
+	slowprint "                                        MMMMMMMMMM.\;i: ,M  MMM  MB                                 "
+	slowprint "                                    MMMX           r\;i: rM MM    MM      M                         "
+	slowprint "                                  @MMW      .,,... .:iri   @MM,: X7    WMMM                         "
+	slowprint "                          \;MMMMMMMMM       .,,,,,,,.. . \;\;.   .:: BMBMMM 2M                      "
+	slowprint "                          MMMMMMMMMMM8WW@i       ,,,,,,. ,7\;i::ii.,MMM   BM                        "
+	slowprint "                         MMMMM  :MMMMMMMMMMMMMW    .,,,,,.  i\;\;ii:  MM   MM                       "
+	slowprint "                         MMMMMMMMMMMM@ MMMMMMMMMM7    ,,,,,. .i\;\;i:    :  M                       "
+	slowprint "                        BMMMWa,\;8MMMMMMM\; MMMMMMMMMZ8  ,,,,,,. .iiiiiii: MM                       "
+	slowprint "                          MM       MMMM   MMMMMMMMMMM   ,,,,,,, i\;iiiii, MM    i                   "
+	slowprint "                          Ma   ,.   MM  MMMMMMMMMMMMMMM    ,,,, ..,iiii, MMXMMMMM7                  "
+	slowprint "                        8MMM8   ,,  @M  MMMMMMMMMMM0@MMM.2   ,, 8r  :ii: 0MM  XM.                   "
+	slowprint "                       MM. @MMW ,,.  aMM MMMMMMMMZ    :MMM8     @MM  iii.    :X                     "
+	slowprint "                      MM        ,,,.   MM8M@SX2    ..    MMM@   B8MM                                "
+	slowprint "                      M                         .,,,,,,   BMMMr i.    MMMM ra0\;7i                  "
+	slowprint "                      MM  MMMMMMB.           .,,,,,,,,,,,    MMMM     Mr MM\;\;SS@Z:                "
+	slowprint "                      SMr  MMMMMMMMMMMMMX:ir         .,,,,,   MMMMMMWMM  M8MMM8Wi                   "
+	slowprint "                        M8   0MMMMMMMMMMMMMMMMMMMr        ,,,  MMM: 8MM  MM  BMW                    "
+	slowprint "                        aMM   :MMMMMMMMMMMM MMMMMMMMMBMMM ,,,    MM  7S  8Z  M:                     "
+	slowprint "                          MMZ   :MMMMMMMM  SM   ,MMMMMM0          @MM                               "
+	slowprint "                            MM.   WMMMMM  .        M@   MMM     BMMMM       :M                      "
+	slowprint "                              MM    @MMM      \;MMMMMMMM0MMMMMMMMB     2MMMMS 8MM                   "
+	slowprint "                            , :MMM  :MMMMMMMMM@         MMS      MMMM, i     Z                      "
+	slowprint "                         MMMMMM  ,:iMSi7                MM  SMMM8                                   "
+	slowprint "                      ZMMa                              MMMMS                                       "
+	slowprint "                    rMM     ............    MMMMM    iM MM                                          "
+	slowprint "                   MM    .........        MM7   @Ma@M   MMMMMMMMMM       MM7                        "
+	slowprint "                 WMW   ..........   iMMMMM2MM   2MM: \;  MMM0   M@       M  M   iXr                 "
+	slowprint "                aM\;  ..........    WMMS  M  MZ  rMMMMr2\;MMMM  MMXMMMMMMMM  M7M2MMMMM              "
+	slowprint "               MM8  ........      MM  MM MM W  MMMMMMMMMMM.  0MM2XXr   MMM MMS   :MM                "
+	slowprint "              MM8  .........  \;MMMMM   MM      8MMMMMMMMMMMMMM   .,i\;          WMM                "
+	slowprint "              MM  ........    MMZMMMM .M   ,,,  BMMMMMMMMM  M         :M       iMM                  "
+	slowprint "             MM   ........  MMMMMMMMM    ,,,,   a7      ,MMMM          M  MMM.   rMW                "
+	slowprint "             MX  ........    MMMMMMMM  ,,,,.  XMM@         ,a          BMMM:SM8 SMM                 "
+	slowprint "             Ma ......    \;MMM    MMMM ,,,,.,M MM                             ,MM                  "
+	slowprint "             MX  ..      ZM@     rM    ,,,,. rWMM                                                   "
+	slowprint "             MM      MZMMMM    . 7M    ,,,,, 0 \;Ma                                                 "
+	slowprint "              MM  BMMM   M   ... rMMM   .,,,    @Mi                                                 "
+	slowprint "               MMMM\;MM.     ....  2MMMM         SMMM                                               "
+	slowprint "                MM  MMM  .....       MMMSS.    MMMMMMMi                                             "
+	slowprint "                     MM     .. ,MMMMMMMMMMMMMMMMMMMMMMMM                                            "
+	slowprint "                      MMMS      iWMMMMMMMMMMMMMMMMMMMMMM                                            "
+	slowprint "                       BMMMM\; MMMMMMMMMMMMMMMMMMMMMMMa MMW                                         "
+	slowprint "                           BMMMMMMM MM  MMMMWMMX       MrZ                                          "
+	slowprint "                                    M8  :MMS 0M8rr\; XWM                                            "
+	slowprint "                                     M    \;MMMMMMMMMMMMMMMMMZ                                      "
+	slowprint "                                     iM      iii7MMMMMM  MMMM                                       "
+	slowprint "               MMMMMMMMMMMMMMMMMMMMMMMMMM        \;\;   ZMB.MMMMMMMMMMMMMM                          "
+	slowprint "                          . 7a, 2MMMMMMMMMMW\;       .  XMM            .X                           "
+	slowprint "                                      arXB  MMMMW       M                                           "
+	slowprint "                                                 8MMMMM                                             "
+}
+
+function frame07
+{
+	slowprint "                           0                                                                        "
+	slowprint "                        rMMMM                                                                       "
+	slowprint "                        M   MZ                                                                      "
+	slowprint "                       iM  XMM2 MM                                                                  "
+	slowprint "                    22MMM       2MMMM,           :MMM                                               "
+	slowprint "                  SM@   \;  . aMMMMMM2MM          MM8MM                                             "
+	slowprint "                  ,MMBMM        2MM2 ZMM        aM   MW                                             "
+	slowprint "                        M   WMMMMMMM   rMX      WM . iMi                                            "
+	slowprint "                     MMMMMMM      MM ,, ZMM    0MM i:  Mr                                           "
+	slowprint "                    .MMZ   MMMMMM@MM  i,   MM  M@  ii: .Ma    0.                                    "
+	slowprint "                      MMM      r\;MMMM iii:  XMMMM   ,i:  M7   MX                                   "
+	slowprint "                       MMM8           ii:.        r:  ,i  MM  XM7                                   "
+	slowprint "                        MMMMM@ iiiiiii:      MMMMMMMM  .i. iMa MX                                   "
+	slowprint "                     .    770: iii:.    MMMMMMMMMMMMMM: .i:    M2                                   "
+	slowprint "              .0MMMMMMBMM     ....  SMMMMMMMMMMMMMMMMMM,  :iii.  2M@M@                              "
+	slowprint "               \;X,..,X\;  .,        7MMMMM  BMMMMMMMM .MMM   .ii, rBBMW                            "
+	slowprint "                      ...   aMMMMMMM0XXXMZ  MMMMMMM.   iMMWX  . 7                                   "
+	slowprint "                 BBZS .   MMMMMMM       0MM MMMMMX   ,   MMMM\;  MMMMMW7                            "
+	slowprint "             WMMMM\;WM  rMMMMMMMM.  ,,,,  MMXri              MMM B,    i                            "
+	slowprint "                   7  MMMM\;iMMMMM   ,,,. M          \;iii:M7  8MMMMiMM0                            "
+	slowprint "                  .MMMMMMMM  :MMMMM ,,,,       MMMMMMMMMMM     MMM.i:BMM                            "
+	slowprint "                  WMMMMMMMM2XMMMX7  ,.     Z0MMMMMMMMMMMMM .,         MM                            "
+	slowprint "               MMMMMMWMMMMMMM,         XMMMMMMMMMMMMMMMMM  ,,,,,,,,,   M                            "
+	slowprint "               ,i ,M0   , .         ZMMMMMMMMMMMMMMMMMMMM .,,,,,,,,.  MM                            "
+	slowprint "                    M           XMMMMMMMMMMMMMMMS SMMMMMZ ,,,,.      MM                             "
+	slowprint "                    SM   ,   7MMMMMMMMMMMMMMMMMr    ,MMM  ,,,,  MMMMMM                              "
+	slowprint "                      M    MMMMMMMMMMMMMMMM  i0: i:  :MB .,,,  MMM                                  "
+	slowprint "                      MM SMMMMMMMMMMMMMMMM     .iii. WM  ,,,. \;M0                                  "
+	slowprint "                   MMMMM BMMMMMMMMMMMMMMMMM  .ii,   iM  ,,,   MM                                    "
+	slowprint "                  SM  BM    X8ZMMMMMMMMMMMMMX    iBMM, .,,. :MM                                     "
+	slowprint "                  XW   M        ,MMMMMMMMMMMMMMMMMMMM       MM                                      "
+	slowprint "                  .MMMMMM    ..       Xi:aMMMMMMMMB   aMMM@X                                        "
+	slowprint "                        MM,     .,:,.           .88MMMMMMMMMMX                                      "
+	slowprint "                         MMMMM                BMMMZ.        MMMi                                    "
+	slowprint "                           r0MMMMMM8. 0 M7BMMMM               MS                                    "
+	slowprint "                                 2MMMMMMMM@      ...........  :M8                                   "
+	slowprint "                                    MMM,:      ..............   MM                                  "
+	slowprint "                                 WMMM     ....................   MM                                 "
+	slowprint "                               MMM\;8MM   ......................  .MM                               "
+	slowprint "                           MMMM    MMMMM    .....        .......  MMM                               "
+	slowprint "                        \; Mr   BMM     MM.          \;MMM ........  SM                             "
+	slowprint "                       MM   aMMX        aMa      MMMMi   ........  SMM                              "
+	slowprint "                     MM     MMa           MMarMMMW     ...........  :MM                             "
+	slowprint "                    BM    S   MM           MMMM8    ..............  ,MM                             "
+	slowprint "                    M  M  iMMWMMM         MMM  XMM  ...............  ZM                             "
+	slowprint "                   \;M MMM  MMM:            MM      ..............    MM                            "
+	slowprint "                   ,MMM  MMM@              MMWMM      ..........    MMM                             "
+	slowprint "                    0WM                MMMM0MMMMWBMM\;     ..     .MMWMM@i                          "
+	slowprint "                                     MMM      iMMM0:\;:r , .. \;,MMMi  \;MMMM                       "
+	slowprint "                                    MM.          aWMB rr\; .. MMM      M,2MM                        "
+	slowprint "                                  aMM   .......           ..         MMr  MM                        "
+	slowprint "                                  MM: .........         ........... aMMM  MM                        "
+	slowprint "                                  aM2   ...      MMMMMS  ..........    B   M7S.\;                   "
+	slowprint "                                    MM        \;MMMZ  :MM  .........    M . @MMMM7                  "
+	slowprint "                                    7MMM..MMMMM       XM   ........   :M ,  2 @M7                   "
+	slowprint "                                       MMMMMMM    ,M   @MX     .     7MM    ZMMB                    "
+	slowprint "                                             MMMMMMM     MM         MMMM    MM                      "
+	slowprint "                                               SM.        MMMMMMMMMMMZXMWMMMM                       "
+	slowprint "                                                              BMB   MMM                             "
+	slowprint "                                                                                                    "
+	slowprint "                                             i  .,....,:                                            "
+	slowprint "                                    ,MMMMMMMMMMMMMMMMMMMMMMZ S, 7MMMMMMMMMMMM                       "
+	slowprint "                                .WMMMMM888Z\;MMMMMMMMMMMMMMMMMMMMMMMMMMMMM80@M.                     "
+	slowprint "                                                                                                    "
+}
+
+function frame08
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                            7a0:         BSM                                                        "
+	slowprint "                           MMMMM      :iMMMM:                                                       "
+	slowprint "                         MMX \;MM    MMMi  M                                                        "
+	slowprint "                        MM    i   MMM  . iM                 7S8MMM                                  "
+	slowprint "              WMS      MS  ::   MMM.  :i M                 aMM  0MM                                 "
+	slowprint "             \;MMM.    MM ,iii MMMZ  ,iii M    iMMMMB aMMM  M7  MM                                  "
+	slowprint "             MX MM   MM  iiii MB  .iiiii MMMMMM\;\;\;riXM\;  MMM  MMMMMMMM,                         "
+	slowprint "            @M7 :@BiMM  iiiii    :iiiiii @XZ    ...  MM@. :B  X.    MM8                             "
+	slowprint "            MMX  BMMM  iiiiiiiiiiiiiiiii.    :iiiii:   MMM      MMMM.                               "
+	slowprint "            M2 .  WM  iiiiiiiiiiiiiiiiiiiiiiii.         M   MMW   ZM                                "
+	slowprint "           MM\; ::    ,iiiiiiiiiiiiiiiiiiiiiiii.MMMMMMM@:M  MM a@MMMZ                               "
+	slowprint "       M \; MMa iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii..MMMMMMMMa B                                        "
+	slowprint "       Ma  72. iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:           M                                         "
+	slowprint "       MM    .:iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii  M                                         "
+	slowprint "        M   :iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:       M                                          "
+	slowprint "        MM8 ,,   :iiiiiiiiiiiiiiiiiiiiiiiiii,.    ,MMMMMMM0                                         "
+	slowprint "         MMX  \;X  ,iiiiiiiiiiiiiiiiiiiiii:   r88M88MW    M                                         "
+	slowprint "   0MMMM    .ZMMM0,iiiiiiiiiiiiiiiiiiiiii:\;MMMM8i        M                                         "
+	slowprint "     2Z  iii, 0MX ,iiiiiiiiiiiiiiiiiiiiii:         ir2MMMM :8                                       "
+	slowprint "   7S    iiii.   ,iiiiiiiiiiiiiiiiiiiiii.   \;SMMMM8   Z2 MMMM\;                                    "
+	slowprint "  ,MWaMM iiiiiiiiiii,,,iiiiiiiiiiiiii.   MMMM@0     WBa  MMi                                        "
+	slowprint "      MM   ,:iiiii:.,a .iiiiiiiiiii:  BMMM      WMMMMMM  M                                          "
+	slowprint "     MX  M.   ,ii,   .M iiiiiiiiiii\;SMM.     rMMM:ZMMMM MM                                         "
+	slowprint "       :MMMMM.    XMMMM iiiiiiiii\;i        ,MMM,ZMMMMMi M                                          "
+	slowprint "             MMMX       iiiiiii\;\;.     MMMMMMMMMMMMMMMM M                                         "
+	slowprint "            MMMMMMMMM@,   .iii:    MMMMMMMMarMMMMMM   MMM                                           "
+	slowprint "          rMM       MMMM7r      .MMMMMMMMMM    XM,  .MMM                                            "
+	slowprint "          MM    .      MMMMi   MMMMMMMMMMM      MMM   MM                                            "
+	slowprint "     MMMM  MW:     8Z    X8MMMMMMMMMMMMaMMX    MMi     MM0                                          "
+	slowprint "     MM MM MMMMMMMMMMMrX:   7Z22aZMMMMMMMMMMMMMMr   .   ZMM                                         "
+	slowprint "     MM  MMMMM:     8M WMMMMMMMMMMMMB,\;    :ri    ....   MMM                                       "
+	slowprint " MMMMMMM  X   :@WWBBMM                   .       .......  MMM                                       "
+	slowprint "  Mr .      M7 ,..   MM              ....................  MM                                       "
+	slowprint "    XM MM   M\;       MMMMMMMMMMMMMM   ...................  .MM                                     "
+	slowprint "        M   @M0       7M          8Mi  ...................  MM                                      "
+	slowprint "        M  MMM                     aM  ...................  MMM                                     "
+	slowprint "         MMM                        MM  .................   MMMMM                                   "
+	slowprint "                                  MMMM  ................   MM  ZMMZ                                 "
+	slowprint "                                rMM  MM    .........      MM    ,MMM                                "
+	slowprint "                                MM  .MM               .iMMM   .   MMM                               "
+	slowprint "                               MM  :MMMMMMMMM0MMWMMMMMMM    i     XMM                               "
+	slowprint "                               BM    MMS\;MMMMMMar    MMMMZr   \;7MMMMS                             "
+	slowprint "                               0MS   @MM          ,MMMMMMMMMMMMMM7                                  "
+	slowprint "                               SM0    MM    ..   ,MM.M   S7777  2MM                                 "
+	slowprint "                               0MMM   0MM        MM  M        7  MM                                 "
+	slowprint "                             ,MMZ       MMMMS iMMM   iM   .    MMM                                  "
+	slowprint "                              MM  MM2   MMBMMMMMM:    MMM . W8,MMi                                  "
+	slowprint "                               7MMMMMMMMM              MM   MMW                                     "
+	slowprint "                                                       MMS@MMM                                      "
+	slowprint "                X\;SMMMMMMMMMMMMMMMB\;                    ,MM                                       "
+	slowprint "             ,MMMMMMMM8 MMMMMMMMMMMMMMMMMMMMMMMMM2                                                  "
+	slowprint "                         ,MMMMMMMMW\;r7MMMMMMMMMMMMMMMMM                                            "
+	slowprint "                                                                                                    "
+}
+
+function frame09
+{
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                                                                                    "
+	slowprint "                                  MMM                                                               "
+	slowprint "                                 8M 7MZ MMBM                 \;aMMMMM                               "
+	slowprint "                                  M   MMM  MX     @M,      MMMMMMMX                                 "
+	slowprint "                              SMMMMMX 8M  @M     MM,.   MMM@a  Z8                                   "
+	slowprint "                             WMM  rMM  .  MMXr2 MM@ :7MMMa    MM         :                          "
+	slowprint "                              MMMM        i\;a7,MM  .::2i  .i, M  MMMMMMMM2MMMMMMMMM                "
+	slowprint "                                  2MMMM  ,    .MM:.i:.  ,iii,7MMMM@B.         MM8Mr                 "
+	slowprint "                                      M \;M  ii..  :iiiiiiiii,        :iii\;7:MM                    "
+	slowprint "                                  .MMMM MMMiii:,::iiiiiiiiiii:,.,:iiiii:                            "
+	slowprint "                                     MM Mi  :iiiiiiiiiiiiiiiiiiiiiiiiii:iMM8                        "
+	slowprint "                                     M  M      :i\;\;\;\;\;\;\;\;\;\;\;iiiiiiiiiii: i MMMMMMM       "
+	slowprint "                                     M  M  MMMa\;i::::::::::,rr\;iiiiiiiii,.      ,@MMMM            "
+	slowprint "                                MMMMMM  M   ,     .........   :,.,iiiiiiiiiiiii.     MMM,           "
+	slowprint "                                MM, MMMMMMMMM   .,,,,,,,,,,,,. .MW .i:\;iiiiiii. :2,.MMMMMM         "
+	slowprint "                              rMM0       MM0MMW    .,,,,,,,,,,,    8M i:\;iiiii.MMMM.               "
+	slowprint "                               BMM  ...     MMM.        .,,,,,,,,,    . r,  :i.  rMMMX              "
+	slowprint "                               :MM  ...... MMa7MMMMMM@r      ,,,,,,,,,,.. M2        ZMMM7           "
+	slowprint "                                MM  .....  MZ     MMM8MMMM :    ,,,,,,,,, :MMMMM7\;     MMM         "
+	slowprint "                                MM ...... ZM  .  MMMMMMaWMMMMW   .,,,,,,,.     ZMMMM     :          "
+	slowprint "                               ,MM .....  M   . ZMMMMMMMMMMMMMMM        ,,,,,  aMMMMMW              "
+	slowprint "                               WM2 ..... aM  ,. WMMMMMMMMMMMMMMMMMMMX      ,,  MMMr iMX MMa:        "
+	slowprint "                               MM  ..... M  .,. 8MMMMi  MMMMMMMMMMMMMMMMW\;    MM  Mr ZMMWMMM\;M    "
+	slowprint "                              XM@  ....  M    . ZMMMM   MMMMMMMMMMMMMMMMMMM   M  MMMa        M      "
+	slowprint "                              MM. ..... B  MS ,  BMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMi        rM  M,     "
+	slowprint "                              MM  ....  M MM  ..   XMMMMMMMZSMMM8  8MMMMMMMMMM27MMMMM  M  W         "
+	slowprint "                              MB  ...   M  M   ,,.            .M    MMMMMMMMMMMr  XM  ,MMMMM        "
+	slowprint "                              MM ....  MM: rM   .,,..  MM  ..  ZMM@MMMMMMMMr      SMMMM  ,XW        "
+	slowprint "                             MM2 ....    M8  MM   .,,.  M2    ,MMMMMMMMMMM                          "
+	slowprint "                             MS  .....  7MMM  MMX     .  MMMZMMMr     MMMMa                         "
+	slowprint "                            MM   ...... M  8M0  MMMM0      :W0Z       M 7                           "
+	slowprint "                           MMi  ....... MMMMMMMS   8MMMZ222,     .   .M                             "
+	slowprint "                          MM   ........  X  M\; MMMMMa:   .i.\;\;      MMr                          "
+	slowprint "                         8M   ..........   M   XMMZ.MMMMMMMMMMMMMMMMM\;                             "
+	slowprint "                        \;M   ............. .        8MMMM   ....                                   "
+	slowprint "                        MM   .............   .      .M,7                                            "
+	slowprint "                       SM   ................    MB MM                                               "
+	slowprint "                       MM  ...............    MM8 .M.                                               "
+	slowprint "                       M   ..............   MM.  MMS                                                "
+	slowprint "                      MM   .............. MMX  MMMM                                                 "
+	slowprint "                MMMMMMMM         ........     Wr  Z                                                 "
+	slowprint "             ,MMMMMMZ   MMMMW8.                                                                     "
+	slowprint "            MMM  2M   .    :XMMMMMX             WMB                                                 "
+	slowprint "           MMB \;MM   ....          MMMMMMMMMMMMMMMMW                                               "
+	slowprint "        MMMM  8MM8  .............                 iMM                                               "
+	slowprint "       M:MMS   \;MM   .......           .........   \;Mi                                            "
+	slowprint "        MMM  i  WM@          .ZMMMMMMM      .....    B                                              "
+	slowprint "2rMMMMMMMMMMMMMMMMMMMM\; M:MMMMiMM  MMMMM.           M,                                             "
+	slowprint "   MMMBX7rrrr7XX7S8ZMMMMMMMMMMMMMMBMMMMMMMM0ZW  XMMMMMMMMMMMMM                                      "
+	slowprint "                                         a2MMMMMMM\;                                                "
+}
+
+function forever
+{
+	while [[ 1 ]]
+	do
+		frame00
+		frame01
+		frame02
+		frame03
+		frame04
+		frame05
+		frame06
+		frame07
+		frame08
+		frame09
+	done
+}
+
+function usage()
+{
+	print "Usage:"
+	print "calvin [options]"
+	print ""
+	print "    Prints a random Calvin ascii art image to the screen with a"
+	print "    delay between each line of 0.01 seconds."
+	print ""
+	print "Options:"
+	print "    -h | --help            Prints this usage information."
+	print "    -f | --forever         Print all 9 Calvin ascii art images in"
+	print "                           sequence, forever."
+	print "    -s | --speed <speed>   Change the delay between each line in"
+	print "                           of ascii art being displayed from the"
+	print "                           default or 0.01 seconds/line to <speed>"
+	print "                           in seconds. Fractional values are valid."
+	print "    0 - 9                  Print just the indicated Calvin ascii art"
+	print "                           image, numbered from 0 to 9."
+	exit -1
+}
+
+RN=$RANDOM
+(( RN = RN % 10 ))
+FRAME="0${RN}"
+
+while [[ "${1}" ]]
+do
+	case "${1}" in
+		"--forever" | "-f" )
+			FRAME=
+			;;
+		"--speed" | "-s" )
+			shift
+			SLEEP=${1}
+			;;
+		"0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9" )
+				FRAME="0${1}"
+				;;
+		"-h" | "--help" )
+			usage;
+			;;
+		* )
+			print "Unknown option \"${1}\""
+			usage
+			;;
+
+	esac
+	shift
+done
+
+if [[ $FRAME ]]
+then
+	frame${FRAME}
+else
+	forever
+fi
+
+

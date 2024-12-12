@@ -1,0 +1,36 @@
+ZSHSHEBANG
+
+
+for favfile in "$@"
+do
+	echo :a "${favfile:a}"
+	echo :A "${favfile:A}"
+	#echo :b "${favfile:b}"
+	echo :c "${favfile:c}"
+	#echo :d "${favfile:d}"
+	echo :e "${favfile:e}"
+	#echo :f "${favfile:f}"
+	#echo :g "${favfile:g}"
+	echo :h "${favfile:h}"
+	#echo :i "${favfile:i}"
+	#echo :j "${favfile:j}"
+	#echo :k "${favfile:k}"
+	echo :l "${favfile:l}"
+	#echo :m "${favfile:m}"
+	#echo :n "${favfile:n}"
+	#echo :o "${favfile:o}"
+	#echo :p "${favfile:p}"
+	echo :P "${favfile:P}"
+	echo :q "${favfile:q}"
+	echo :Q "${favfile:Q}"
+	echo :r "${favfile:r}"
+	#echo :s "${favfile:s}"
+	echo :t "${favfile:t}"
+	echo :u "${favfile:u}"
+	#echo :v "${favfile:v}"
+	#echo :w "${favfile:w}"
+	#echo :x "${favfile:x}"
+	#echo :y "${favfile:y}"
+	#echo :z "${favfile:z}"
+	
+done

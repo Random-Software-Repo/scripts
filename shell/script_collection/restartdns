@@ -1,0 +1,12 @@
+ZSHSHEBANG
+FREEBSD=
+grep -q FreeBSD /etc/os-release && FREEBSD=YES
+if [[ "${FREEBSD}" == "YES" ]]
+then
+	echo "FREEBSD"
+	service named stop; service named start
+else
+	echo "NOT-FREEBSD"
+	systemctl restart systemd-resolved.service
+fi
+

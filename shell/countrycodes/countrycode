@@ -1,0 +1,83 @@
+ZSHSHEBANG
+
+function isnumeric
+{
+	
+}
+
+database="${0:h}/../share/countrycodes/countrycodes"
+
+if [[ ! -e "${database}" ]]
+then
+	database="/usr/local/share/countrycodes/countrycodes"
+fi
+
+#echo "Database = \"${database}\""
+
+while [ $1 ]
+do
+	p="${1:u}"
+	if [[ "${p}" =~ "^([0-9][-])?[0-9]+$" ]]
+	then
+		# parameter is numeric (with optional hyphen), so is a calling-code.
+		# we'll check this against field 5 in the countrycodes data file
+		field=5
+	elif [[ "${p}" =~ "^[A-Z][A-Z]$" ]]
+	then
+		# parameter is two character country code, so we'll check against
+		# field 2
+		field=2
+	elif [[ "${p}" =~ "^[A-Z][A-Z][A-Z]$" ]]
+	then
+		# parameter is three character country code, so we'll check against
+		# field 3
+		field=3
+	else
+		# parameter is something else, so we'll check agains English name in
+		# field 1
+		field=1
+	fi
+	
+	matches=0
+	linenumber=0
+	header="--header--"
+	while read line
+	do
+		(( linenumber ++ ))
+		if [[ "${linenumber}" == "1" ]]
+		then
+			#header="$(echo "${line}" | awk -F '	' -e '{print $2 " " $3 " " $4 " " $5 " " $6}')"
+			header="$(echo "${line}" | awk -F '	' -e '{printf "%12s %12s %12s %12s %12s",$2,$3,$4,$5,$6}')"
+		fi
+		testvalue=$(echo "${line}" | awk -F '	' -e "{print \$${field}}")
+		#echo "\"${p}\" == \"${testvalue:u}\""
+		if [[ "${field}" == "1" ]]
+		then
+			if [[ "${testvalue:u}" =~ "${p}" ]]
+			then
+				(( matches ++ ))
+				if [[ -n "${header}" ]]
+				then
+					echo "	${header}"
+					header=
+				fi
+				echo "$(echo "${line}" | awk -F '	' -e '{print $1}')"
+				echo "	$(echo "${line}" | awk -F '	' -e '{printf "%6s %12s %12s %12s %12s",$2,$3,$4,$5,$6}')"
+			fi
+		else
+			if [[ "${testvalue}" == "${p}" ]]
+			then
+				(( matches ++ ))
+				echo "$(echo "${line}" | awk -F '	' -e '{print $1}')"
+				echo "	${header}"
+				echo "	$(echo "${line}" | awk -F '	' -e '{printf "%6s %12s %12s %12s %12s",$2,$3,$4,$5,$6}')"
+			fi
+		fi
+	done < "${database}"
+	if [[ "${matches}" == "0" ]]
+	then
+		echo "No countries or polities matched your search parameter of \"${1}\""
+	fi
+
+	shift
+done
