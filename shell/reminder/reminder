@@ -1,0 +1,159 @@
+ZSHSHEBANG
+
+function usage
+{
+	echo "Reminder will show a system notification with a custom message and an audio notification at a specified time."
+	echo ""
+	echo "Usage: "
+	echo "    reminder [options] [<message>] <timespec>"
+	echo "where:"
+	echo "    <message>    is the message to be displayed. Defaults to \"Reminder!\""
+	echo "    <timespec>   is when the message should be displayed. timespec is any"
+	echo "                 date format supported by the date command. E.G. \"4 minutes\","
+	echo "                 or \"2054-03-03 13:04\" or \"1 day\" etc."
+	echo "options are:"
+	echo "    -h           print this usage information."
+	echo "    -q           omit the usual notification sound."
+	echo "    -p <file>    play <file> sound instead of the usual notification sound."
+	echo "                 -p will override other sound options."
+	echo "    -b           play a series of beeps instead of the usual notification sound"
+	echo "    -i           display the message notification immediately (ignoring the timespec)"
+	echo ""
+	echo "All options must occur before the <message> and <timespec> parameters."
+	echo "The -i option must be the last option specified, if used."
+	exit
+}
+
+function snd
+{
+	$(play "$@" &> /dev/null )&
+}
+function ply
+{
+			if [[ -e "${soundfile}" ]] 
+			then
+				snd "${soundfile}"
+			else
+				if [[ "${audio}" == "beeps" ]]
+				then
+					sleep_pause=0
+					for d in 1 2 3
+					do
+						sleep $sleep_pause
+						for n in 1 2 3
+						do
+							snd -n synth 0.15 sin 810 fade l 0 0.15 0.05
+							#play -q -n synth 0.085 sin 810 > /dev/null 2&>1
+						done
+						sleep_pause=0.15
+					done
+				elif [[ "${audio}" == "strum" ]]
+				then
+					snd -n synth pl G2 pl B2 pl D3 pl G3 pl D4 pl G4 delay 0 .05 .1 .15 .2 .25 remix - fade 0 4 .1 norm -1
+				fi
+			fi
+
+}
+
+command="${0:P}"
+
+which zenity > /dev/null
+if [[ $? -ne 0 ]]
+then
+	echo "reminder requires the \"zenity\" package, which does not appear to be installed."
+	echo "Install \"zenity\" using whichever package manager your system includes."
+	exit -2
+fi
+
+which sleeptil > /dev/null
+if [[ $? -ne 0 ]]
+then
+	echo "reminder requires the \"sleeptil\" utility, which does not appear to be installed."
+	echo "\"sleeptil\" is part of the same \"scripts\" repository that reminder itself came from."
+	exit -2
+fi
+
+which play > /dev/null
+if [[ $? -ne 0 ]]
+then
+	echo "reminder requires the \"play\" utility, which does not appear to be installed."
+	echo "\"play\" is part of the \"sox\" package. Install \"sox\" using whichever packagemanager your system includes."
+	exit -2
+fi
+
+
+if [[ "$#" == "0" ]]
+then
+	usage
+	exit 0
+fi
+
+mode=spawn
+message='Reminder!'
+timespec=
+soundfile=
+sleeptime=0
+audio=strum
+
+if [[ "${0:t}" == "timer" ]]
+then
+	message="Time's Up!"
+fi
+
+while [[ "$1" ]]
+do
+	case "${1}" in
+		"-p")
+			shift
+			if [[ -e "${1}" ]]
+			then
+				soundfile="${1:P}"
+			fi
+			;;
+		"-q")
+			audio=
+			;;
+		"-b")
+			audio=beeps
+			;;
+		"-h")
+			usage
+			;;
+		"-i")
+			shift
+			message="${1}"
+			sleeptil "${2}"
+			ply&
+			zenity --notification --text="${message}"&
+			exit 0 
+			;;
+		*)
+			## either the message or the timespec. If this is the final parameter, it's
+			## the time spec, otherwise it's the message.
+			if [[ "$#" -eq 2 ]]
+			then
+				#echo "two parameters left. This parameter must be the message"
+				message="${1}"
+			elif [[ "$#" -eq 1 ]] 
+			then
+				#echo "one parameter left. This must be the timespec"
+				timespec="${1}"
+			fi
+			;;
+	esac
+	shift 
+done
+
+
+if [[ -e "${soundfile}" ]]
+then
+	$(exec "${command}" -p "${soundfile}" -i "${message}" ${timespec} )&
+elif [[ "${audio}" == "strum" ]]
+then
+	$(exec "${command}" -i "${message}" ${timespec} )&
+elif [[ "${audio}" == "beeps" ]]
+then
+	$(exec "${command}" -b -i "${message}" ${timespec} )&
+else
+	$(exec "${command}" -q -i "${message}" ${timespec} ) &
+fi

@@ -1,0 +1,29 @@
+#!/usr/bin/zsh
+rm -f notificationtone.raw
+rm -f notificationtone.wav
+touch notificationtone.raw
+
+counter=1
+while [[ "${counter}" -lt 4 ]]
+do
+	beepcounter=1
+	while [[ "${beepcounter}" -lt 5 ]]
+	do
+		## Generates the beep tone
+		sox -n -t raw -e signed -r 96k -b 16 -c 2 - synth 0.1 sin 880 >> notificationtone.raw
+		## appends 0.2 second of silence
+		sox -n -t raw -e signed -r 96k -b 16 -c 2 - trim 0 0.2 >> notificationtone.raw
+		(( beepcounter += 1 ))
+	done
+	## add 3/4 a second separation between sets (and there's already a .2 secondsilene after the last beep, so do the math)
+	sox -n -t raw -e signed -r 96k -b 16 -c 2 - trim 0 0.55 >> notificationtone.raw
+	(( counter += 1 ))
+done
+## appends 1 second of silence
+#sox -n -t raw -e signed -r 96k -b 16 -c 2 - trim 0 1.0 >> notificationtone.raw
+
+## now, convert the raw file to a wav file
+sox -t raw -e signed -r 96k -b 16 -c 2 notificationtone.raw notificationtone.wav
+
+## now, clean up and delete the no-longer needed raw file
+rm -f notificationtone.raw
