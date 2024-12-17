@@ -43,7 +43,6 @@ function ply
 						for n in 1 2 3
 						do
 							snd -n synth 0.15 sin 810 fade l 0 0.15 0.05
-							#play -q -n synth 0.085 sin 810 > /dev/null 2&>1
 						done
 						sleep_pause=0.15
 					done
