@@ -114,8 +114,7 @@ lim=${#spinner}
 c=1 
 d=1
 
-#'ps -q ${1} -o comm= 2&>1 > /dev/null'
-ps -q ${pid} -o comm= &>> /dev/null
+ps -q ${pid} -o comm= &> /dev/null
 while [[ $? -eq 0 ]]
 do
 	print -n "\r$spinner[${c}]  ${message}$dots[${d}]"
