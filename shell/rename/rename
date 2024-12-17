@@ -7,6 +7,8 @@ function usage()
 	print ""
 	print "Rename will replace all occurences of <source text> with <text>"
 	print "in the file names of all files specified on the command line."
+	print ""
+	print "NOTE:"
 	print "<source text> and <text> are both static strings, not expressions."
 	print ""
 	print "If <file name> includes a path, only the final element will"
@@ -18,6 +20,8 @@ function usage()
 	print "will be renamed to ./foods/cheeses/fromagey_fromages.txt"
 	exit 1
 }
+
+setopt NO_GLOB_SUBST
 
 if [[ $# -lt 3 ]]
 then
@@ -39,6 +43,7 @@ do
 	then
 		local frompath="${1:h}"
 		local fromfile=${1:t}
+		# parameter expansion:
 		local tofile="${fromfile//${sourcetext}/${text}}"
 		local destination="${frompath}/${tofile}"
 
