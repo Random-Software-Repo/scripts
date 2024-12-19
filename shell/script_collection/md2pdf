@@ -10,6 +10,13 @@ function usage
 	echo " where <input file> is a text file in standard markdown format."
 	echo " The output in PDF format will be saved to <output file> if it"
 	echo " is specified, or to <input file basename>.pdf if not specified."
+	echo ""
+	echo "md2pdf requires the utilites \"pandoc\" and \"wkhtmltopdf\"."
+	echo "These both may be available in your (linux) distro's repositories."
+	echo "Try:"
+	echo "    sudo apt install pandoc wkhtmltopdf"
+	echo "  or"
+	echo "    sudo dnf install pandoc wkhtmltopdf"
 }
 
 function getcss
@@ -229,10 +236,6 @@ then
 		fi
 	done | wkhtmltopdf  -B 20mm -T 20mm -L 25mm -R 25mm -q -s Letter  - "${outfile}"
 
-	#'<link rel="stylesheet" href="STYLESHEET" />'
-	;# | wkhtmltopdf -B 25mm -T 25mm -L 25mm -R 25mm -q -s Letter - "${outfile}" 
-	#pandoc --from=markdown_mmd+yaml_metadata_block+smart -t html5 --css ${0:h}/md2pdf.css ${infile} -o ${outfile} -s --pdf-engine=wkhtmltopdf
-	#pandoc -V 'mainfont:DejaVuSans' -f markdown_strict "${infile}" -s -o "${outfile}"
 else
 	echo "Error: Input file \"${infile}\" does not exist. "
 	exit -1
