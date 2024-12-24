@@ -4,13 +4,13 @@ ZSHSHEBANG
 
 #must be run as a user, but some parts require sudo
 
-if [[ $(which balooctl) ]]
+if (( $+commands[balooctl] ))
 then
 	echo "balooctl"
 	balooctl suspend
 	balooctl disable
 	balooctl purge
-elif [[ $(which balooctl6) ]]
+elif (( $+commands[balooctl6] ))
 then
 	echo "balooctl6"
 	balooctl6 suspend

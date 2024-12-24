@@ -401,7 +401,7 @@ function check_ffmpeg
 {
 	if [[ ! "${FFMPEG}" == "no-op" ]]
 	then
-		local fullpathtoffmpeg=$(/usr/bin/which ${FFMPEG} 2> /dev/null)
+		local fullpathtoffmpeg="${FFMPEG}"
 		if [[ -e "${fullpathtoffmpeg}" ]]
 		then
 			if [[ -x "${fullpathtoffmpeg}" ]]
@@ -409,7 +409,7 @@ function check_ffmpeg
 				local ffmpegversion=$(${fullpathtoffmpeg} -version -hide_banner &> /dev/null | grep "ffmpeg version")
 				if [[ ! -n "${ffmpegversion}" ]]
 				then
-					if [[ "${FFMPEG}" == "ffmpeg" ]]
+					if [[ "${FFMPEG}" =~ "*ffmpeg" ]]
 					then
 						error "FFMPEG is required for ffm to function.\nThe command \"${fullpathtoffmpeg}\" does not appear to be ffmpeg, or is a version of ffmpeg ffm does not expect."
 					else
@@ -417,12 +417,10 @@ function check_ffmpeg
 					fi
 				fi
 			else
-				## This error shouldn't ever occur as "/usr/bin/which $FFMPEG" won't product a result for
-				## someting that isn't already executable. 
 				error "FFMPEG is required for ffm to function.\nThe ffmpeg executable (${fullpathtoffmpeg}) is not executable."
 			fi
 		else
-			error "FFMPEG is required for ffm to function.\nThe ffmpeg executable (/usr/bin/which \"${FFMPEG}\" = \"${fullpathtoffmpeg}\") does not exist."
+			error "FFMPEG is required for ffm to function.\nThe ffmpeg executable does not exist."
 		fi
 	fi
 }
@@ -471,7 +469,7 @@ function no-op
 	## does nothing
 }
 
-local FFMPEG=ffmpeg
+local FFMPEG="$commands[ffmpeg]"
 local FFPROBE=ffprobe
 local QUIET=
 local DELETE=
