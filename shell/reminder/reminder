@@ -56,24 +56,21 @@ function ply
 
 command="${0:P}"
 
-which zenity > /dev/null
-if [[ $? -ne 0 ]]
+if (( ! $+commands[zenity] ))
 then
 	echo "reminder requires the \"zenity\" package, which does not appear to be installed."
 	echo "Install \"zenity\" using whichever package manager your system includes."
 	exit -2
 fi
 
-which sleeptil > /dev/null
-if [[ $? -ne 0 ]]
+if (( ! $+commands[sleeptil] ))
 then
 	echo "reminder requires the \"sleeptil\" utility, which does not appear to be installed."
 	echo "\"sleeptil\" is part of the same \"scripts\" repository that reminder itself came from."
 	exit -2
 fi
 
-which play > /dev/null
-if [[ $? -ne 0 ]]
+if (( ! $+commands[play] ))
 then
 	echo "reminder requires the \"play\" utility, which does not appear to be installed."
 	echo "\"play\" is part of the \"sox\" package. Install \"sox\" using whichever packagemanager your system includes."
