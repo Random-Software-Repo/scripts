@@ -7,7 +7,7 @@ ZSHSHEBANG
 #	/root_path_for_archive/album_artist/album_name/<disc - ><track_number - >track_name.extension
 #
 #	where 
-#		root path is defined in the variable $ARCHIVE_BASE
+#		root path is defined in the variable $ARCHIVE_BASE which will default to $HOME/Music if not otherwise defined
 #		album_artist is the tag <albumartist> if present, other wise the tag <artist> is used		
 #		if the tag <discnumber> is present then "discnumber - " is prefixed to the file name
 #		if the tag <tracknumber> is present then "tracknumber - " is prefixed to the file name, but after <discnumber> above
@@ -18,7 +18,7 @@ ZSHSHEBANG
 ## where we're moving them to (only set if variable is not already in the environment)
 if [[ ! -n "${ARCHIVE_BASE}" ]]
 then
-	ARCHIVE_BASE="${HOME}/Music"
+	ARCHIVE_BASE=${HOME}/Music
 fi
 
 if [[ ! -d ${ARCHIVE_BASE} ]]
