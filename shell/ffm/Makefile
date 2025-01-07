@@ -1,7 +1,7 @@
 include ../../MakefileShebangs.mk
 
 PROGRAM = ffm
-PROGRAMS = ffm ffmx
+PROGRAMS = ffm ffmx ffmsplit
 
 default:
 	@echo "Installs or uninstalls $(PROGRAMS) into /usr/local/bin (or an alternate)."

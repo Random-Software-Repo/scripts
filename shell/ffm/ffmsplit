@@ -1,0 +1,53 @@
+ZSHSHEBANG
+
+LABEL="part_"
+SEGMENTS=0
+typeset -a SEGSTARTS
+typeset -a FFMPARAMS
+
+while [[ ${1} ]]
+do
+	if [[ "${1}" =~ "^[0-9]*$" ]]
+	then
+		echo "Number: $1"
+		(( SEGMENTS = SEGMENTS + 1 ))
+		SEGSTARTS[${SEGMENTS}]="${1}"
+	elif [[ "${1}" == "--label" ]]
+	then
+		shift 1
+		LABEL="${1}"
+	else
+		echo "ffm param \"${1}\""
+		FFMPARAMS+=("${1}")
+		SOURCE="${1}"
+	fi
+	shift 1
+done
+
+FFMPARAMS=(${FFMPARAMS:#$SOURCE})
+
+
+for n in {1..$SEGMENTS}
+do
+	local START=$SEGSTARTS[${n}]
+	local DASHD=
+	local END=
+	local PAD=
+	(( next = n +1 ))
+	if [[ -n $SEGSTARTS[${next}] ]]
+	then
+		DASHD="-d"
+		END=$SEGSTARTS[${next}]
+		(( END = END - START ))
+	fi
+	if [[ $SEGMENTS -ge 10 ]]
+	then
+		if [[ $n -lt 10 ]]
+		then
+			PAD="0"
+		fi
+	fi
+	local segment=${LABEL}${PAD}{$n}
+	echo ffm -s ${START} ${DASHD} ${END} "${FFMPARAMS[@]}" "${SOURCE}" "${SOURCE:r}.${LABEL}${PAD}${n}.mkv"
+	ffm -s ${START} ${DASHD} ${END} "${FFMPARAMS[@]}" "${SOURCE}" "${SOURCE:r}.${LABEL}${PAD}${n}.mkv"
+done
