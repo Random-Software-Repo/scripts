@@ -1,0 +1,12 @@
+ZSHSHEBANG
+#
+#	Plays audio files sending the audio to a remote
+#	server defined in $AUDIOTARGET
+#
+#	Requirements: sox installed on both the client and the server
+#					Server must have audio output that works
+#					same user on both client and server 
+#					ssh keys for the user playing audio installed on the server
+#					use the rvolumeup and rvolumedown to control volume on server
+#
+sox "$@" -t wav - | ssh ${AUDIOTARGET} play - 

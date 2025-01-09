@@ -1,0 +1,3 @@
+ZSHSHEBANG
+
+ssh ${AUDIOTARGET} mixer vol=-10%
