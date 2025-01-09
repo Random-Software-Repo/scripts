@@ -1,12 +1,121 @@
 ZSHSHEBANG
 #
 #	Plays audio files sending the audio to a remote
-#	server defined in $AUDIOTARGET
+#	server defined in ${RPLAYAUDIOTARGET}
 #
 #	Requirements: sox installed on both the client and the server
-#					Server must have audio output that works
-#					same user on both client and server 
-#					ssh keys for the user playing audio installed on the server
-#					use the rvolumeup and rvolumedown to control volume on server
+#			Server must have audio output that works
+#			same user on both client and server 
+#			ssh keys for the user playing audio installed on the server
+#			use the rvolumeup and rvolumedown to control volume on server
 #
-sox "$@" -t wav - | ssh ${AUDIOTARGET} play - 
+
+function usage()
+{
+	print "Usage:"
+	print "    rplay [options] <file1> [<filen> ...]"
+	print ""
+	print "Options: (all options must come before the file list)"
+	print "    -h | --help         This usage information."
+	print "    -host <hostname>    The target computer to send the audio"
+	print "                        stream to. <hostname> will default to "
+	print "                        \${RPLAYAUDIOTARGET}, if it is defined."
+	print "                        --host will override this environment"
+	print "                        variable."
+	print "    -16                 Resample the output resolution to 16bit."
+	print "    -48                 Resample the output sample rate to 48KHz"
+	print "    -96                 Resample the output sample rate to 96KHz"
+	print ""
+	print "                        Resample options are useful when sending"
+	print "                        audio to a device which either can't play"
+	print "                        the higher resolution audio, or on which"
+	print "                        the extra detail will be lost (e.g. most"
+	print "                        integrated DAC devices will likely not"
+	print "                        benefit noticably from anything more than"
+	print "                        16bit/48KHz digital audio)."
+	print ""
+	print "                        A 16bit/48KHz stereo audio stream will "
+	print "                        use around 1.6Mbps network bandwidth."
+	print "                        While a 24bit/192KHz stereo audio stream"
+	print "                        will use around 9.6Mbps network bandwidth."
+	exit 0
+}
+
+function sox_installed()
+{
+	if (( ! $+commands[sox] ))
+	then
+		print "The command \"sox\" must be installed on both this computer."
+		print "and the remote computer targeted by \${RPLAYAUDIOTARGET} (${RPLAYAUDIOTARGET})."
+		print "This may be in your package management system as simply \"sox\"."
+
+		if (( $+commands[dkpg] ))
+		then
+			print "You may be able to install it with the command:"
+			print "    sudo apt install sox"
+		elif (( $+commands[dnf] ))
+		then
+			print "You may be able to install it with the command:"
+			print "    sudo dnf install sox"
+		fi
+		exit 1
+	fi
+}
+
+function ssh_ok()
+{
+	#ssh -o ConnectTimeout=1 -o BatchMode=yes hostname whoami 2> /dev/null
+	local SSHERROR=$(ssh -o ConnectTimeout=1 -o BatchMode=yes ${RPLAYAUDIOTARGET} whoami 2>&1 )
+	#f [[ $? -ne 0 ]]
+	if [[ "${SSHERROR}" != "${USER}" ]]
+	then
+		print "${SSHERROR}"
+		print ""
+		print "Rplay uses ssh with keys to connect to the remote server."
+		print "Rplay is not able to connect to \"${RPLAYAUDIOTARGET}\"."
+		print "You can generate a key with ssh-keygen and then copy the"
+		print "to the remote server with ssh-copy-id, but the usage of these"
+		print "commands is beyond the abilities of this little program."
+		exit -2
+	fi
+}
+
+while [[ "$1" =~ '^-' ]]
+do
+	case "${1}" in
+		"-h" | "--help")
+			usage
+			;;
+		"-host")
+			shift 1
+			RPLAYAUDIOTARGET="${1}"
+			;;
+		"-16")
+			bitrate="-b16"
+			;;
+		"-48")
+			samplerate="-r48k"
+			;;
+		"-96")
+			samplerate="-r96k"
+			;;
+		"--diagnostics")
+			DIAGNOSTICS=yes
+			;;
+	esac
+	shift 1
+done
+
+if [[ -n "${DIAGNOSTICS}" ]]
+then
+	print "audiotarget:${RPLAYAUDIOTARGET}"
+	print "samplerate:${samplerate}"
+	print "bitrate=${bitrate}"
+	print "remaining parameters: $@"
+fi
+
+sox_installed
+ssh_ok ${RPLAYAUDIOTARGET}
+
+
+sox "$@" ${bitrate} ${samplerate} -t wav - | ssh ${RPLAYAUDIOTARGET} play - 
