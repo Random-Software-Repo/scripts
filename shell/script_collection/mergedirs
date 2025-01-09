@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 #
 #	will move the contents of a source directory into a target directory

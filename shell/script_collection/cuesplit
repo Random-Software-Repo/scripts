@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 ### Splits a single FLAC file into individual tracks according to CUE file
 function usage
 {

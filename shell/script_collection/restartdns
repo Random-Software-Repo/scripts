@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 FREEBSD=
 grep -q FreeBSD /etc/os-release && FREEBSD=YES
 if [[ "${FREEBSD}" == "YES" ]]

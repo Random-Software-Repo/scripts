@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 	if [[ "$#" -lt "2" || "$#" -gt 3 ]]
 	then

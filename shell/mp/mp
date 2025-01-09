@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 ###############################################################################
 ###                                                                         ###
 ###    Plays audio, image or video files using MPV                          ###

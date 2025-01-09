@@ -14,7 +14,8 @@ default1: default
 	@echo "This Makefile will also locate the default locations of scripting"
 	@echo "interpreters (zsh, bash, perl, and python). These paths will be"
 	@echo "inserted into the script files themselves as the appropriate"
-	@echo "shebang (#!/path/to/interpreter) for each script."
+	@echo "shebang (#!/path/to/interpreter) for each script, replacing "
+	@echo "the existing shebang with the correct one."
 	@echo ""
 	@echo "These paths can be overridden when calling make by providing the"
 	@echo "needed path using command line variables. The paths must have the"
@@ -42,10 +43,10 @@ setup: clean
 	@for d in $(PROGRAMS); \
 	do \
 		echo "Program: $${d}"; \
-		grep -q "^ZSHSHEBANG" "$${d}" && sed "s/ZSHSHEBANG/#!$(zshlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
-		grep -q "^BASHSHEBANG" "$${d}" && sed "s/BASHSHEBANG/#!$(bashlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
-		grep -q "^PERLSHEBANG" "$${d}" && sed "s/PERLSHEBANG/#!$(perllocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
-		grep -q "^PYTHONSHEBANG" "$${d}" && sed "s/PYTHONSHEBANG/#!$(pythonlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
-		grep -q "^#\!\/bin\/sh" "$${d}" && cp "$${d}" "./$(WORKING)/$${d}"; \
+		grep -q '^#!.*/zsh' "$${d}" && sed "s/^#!.*\/zsh/#!$(zshlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
+		grep -q '^#!.*/bash' "$${d}" && sed "s/^#!.*\/bash/#!$(bashlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
+		grep -q '^#!.*/perl' "$${d}" && sed "s/^#!.*\/perl/#!$(perllocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
+		grep -q '^#!.*/python' "$${d}" && sed "s/^#!.*\/python/#!$(pythonlocation)/g" "$${d}" > "./$(WORKING)/$${d}"; \
+		grep -q '^#!\/bin\/sh' "$${d}" && cp "$${d}" "./$(WORKING)/$${d}"; \
 		chmod 755 "./$(WORKING)/$${d}"; \
 	done;

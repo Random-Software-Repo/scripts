@@ -1,2 +1,2 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 play -q -n synth 0.20 sin 800 &> /dev/null

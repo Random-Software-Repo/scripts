@@ -1,4 +1,5 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
+
 units=(B K M G T P E)
 function reduce
 {

@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 	####
 	#### renames a list of files or directories by pre-pending a string to the

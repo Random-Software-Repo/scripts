@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 ## PMV more or less is the same as mv, but will make some assumptions about the final parameter
 ## given and how it relates the the directory defined in $PORTALM.

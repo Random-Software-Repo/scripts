@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 	##Find the areadcodes database
 	database="${0:h}/../share/areacodes/areacodes"
 	if [[ ! -e "${database}" ]]

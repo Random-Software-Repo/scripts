@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 ## Converts audio files (or the audio portion of video files) to another audio format using ffmpeg
 

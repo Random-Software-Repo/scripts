@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 fname=${0:t}
 local resource_path="${0:h}/../share/words/words"
 if [[ ! -r ${resource_path} ]]

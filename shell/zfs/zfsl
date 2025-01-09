@@ -1,4 +1,4 @@
-ZSHSHEBANG
+#!/usr/bin/zsh
 
 # shows filesystem and volumes. replaces long 'filesystem' and 'volume' labels with 'fs' 
 # and 'v' respectively so results aren't as wide.
