@@ -13,13 +13,21 @@
 function usage()
 {
 	print "Usage:"
-	print "    rplay [options] <file1> [<filen> ...]"
+	print "    To play audio files:"
+	print "        rplay [options] <file1> [<filen> ...]"
+	print "    or, to increase the audio volume on the target:"
+	print "        rvolumeup [options]"
+	print "    or, to increase the audio volume on the target:"
+	print "        rvolumedown [options]"
+	print ""
+	print "    rvolumeup and rvolumedown are symlinks to rplay."
 	print ""
 	print "Options: (all options must come before the file list)"
 	print "    -h | --help         This usage information."
 	print "    -host <hostname>    The target computer to send the audio"
-	print "                        stream to. <hostname> will default to "
-	print "                        \${RPLAYAUDIOTARGET}, if it is defined."
+	print "                        stream to, or on which to issue the"
+	print "                        volume commands. <hostname> will default"
+	print "                        to \${RPLAYAUDIOTARGET}, if it is defined."
 	print "                        --host will override this environment"
 	print "                        variable."
 	print "    -16                 Resample the output resolution to 16bit."
@@ -41,33 +49,47 @@ function usage()
 	exit 0
 }
 
+function sox_instructions()
+{
+	print "The command \"sox\" must be installed on both this computer."
+	print "and the remote computer targeted by \${RPLAYAUDIOTARGET} (${RPLAYAUDIOTARGET})."
+	print "This may be in your package management system as simply \"sox\"."
+
+	if (( $+commands[dpkg] ))
+	then
+		print ""
+		print "You may be able to install it with the command:"
+		print "    sudo apt install sox"
+	elif (( $+commands[dnf] ))
+	then
+		print ""
+		print "You may be able to install it with the command:"
+		print "    sudo dnf install sox"
+	elif (( $+commands[pkg] ))
+	then
+		print ""
+		print "You may be able to install it with the command:"
+		print "    sudo pkg install sox"
+	fi
+	exit 1
+}
+
 function sox_installed()
 {
 	if (( ! $+commands[sox] ))
 	then
-		print "The command \"sox\" must be installed on both this computer."
-		print "and the remote computer targeted by \${RPLAYAUDIOTARGET} (${RPLAYAUDIOTARGET})."
-		print "This may be in your package management system as simply \"sox\"."
-
-		if (( $+commands[dkpg] ))
-		then
-			print "You may be able to install it with the command:"
-			print "    sudo apt install sox"
-		elif (( $+commands[dnf] ))
-		then
-			print "You may be able to install it with the command:"
-			print "    sudo dnf install sox"
-		fi
-		exit 1
+		sox_instructions
 	fi
 }
 
 function ssh_ok()
 {
-	#ssh -o ConnectTimeout=1 -o BatchMode=yes hostname whoami 2> /dev/null
-	local SSHERROR=$(ssh -o ConnectTimeout=1 -o BatchMode=yes ${RPLAYAUDIOTARGET} whoami 2>&1 )
-	#f [[ $? -ne 0 ]]
-	if [[ "${SSHERROR}" != "${USER}" ]]
+	local SSHERROR=$(ssh -o ConnectTimeout=1 -o BatchMode=yes ${RPLAYAUDIOTARGET} which sox 2>&1 )
+
+	if [[ "${SSHERROR}" =~ "not found" ]]
+	then
+		sox_instructions
+	elif [[ ! "${SSHERROR}" =~ "\/.*\/sox" ]]
 	then
 		print "${SSHERROR}"
 		print ""
@@ -75,7 +97,7 @@ function ssh_ok()
 		print "Rplay is not able to connect to \"${RPLAYAUDIOTARGET}\"."
 		print "You can generate a key with ssh-keygen and then copy the"
 		print "to the remote server with ssh-copy-id, but the usage of these"
-		print "commands is beyond the abilities of this little program."
+		print "commands is beyond the abilities of this little script."
 		exit -2
 	fi
 }
@@ -117,5 +139,12 @@ fi
 sox_installed
 ssh_ok ${RPLAYAUDIOTARGET}
 
-
-sox "$@" ${bitrate} ${samplerate} -t wav - | ssh ${RPLAYAUDIOTARGET} play - 
+if [[ "${0}" =~ "rvolumeup$" ]]
+then
+	ssh ${RPLAYAUDIOTARGET} mixer vol=+10%
+elif [[ "${0}" =~ "rvolumedown$" ]]
+then
+	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
+else
+	sox "$@" ${bitrate} ${samplerate} -t wav - | ssh ${RPLAYAUDIOTARGET} play - 
+fi

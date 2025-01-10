@@ -2,7 +2,7 @@ include ../../MakefileShebangs.mk
 
 .PHONY: all install uninstall locate
 
-PROGRAMS = rplay rvolumeup rvolumedown
+PROGRAMS = rplay
 
 default:
 	@echo "Installs $(PROGRAMS) into /usr/local/bin."
@@ -19,7 +19,10 @@ default:
 install: setup
 	cd $(WORKING);cp -f $(PROGRAMS) "$(dir)/"
 	cd "$(dir)"; chmod 755 $(PROGRAMS) 
+	cd "$(dir)";ln -sf "./$(PROGRAMS)" "./rvolumeup"
+	cd "$(dir)";ln -sf "./$(PROGRAMS)" "./rvolumedown"
+
 	
 uninstall:
-	cd "$(dir)"; rm -f $(PROGRAMS)
+	cd "$(dir)"; rm -f $(PROGRAMS) rvolumeup rvolumedown
 

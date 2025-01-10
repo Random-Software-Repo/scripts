@@ -1,3 +1,0 @@
-#!/usr/bin/zsh
-
-ssh ${AUDIOTARGET} mixer vol=+10%
