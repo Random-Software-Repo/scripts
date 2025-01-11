@@ -1,9 +1,9 @@
 #!/usr/bin/zsh
 #
 #	Plays audio files sending the audio to a remote
-#	server defined in ${RPLAYAUDIOTARGET}
+#	server defined by -host or in ${RPLAYAUDIOTARGET}
 #
-#	Requirements: sox installed on both the client and the server
+#	Requirements: ffmpeg installed on the client, and sox installed on the server
 #			Server must have audio output that works
 #			same user on both client and server 
 #			ssh keys for the user playing audio installed on the server
@@ -34,7 +34,6 @@ function usage()
 	print "                           to \${RPLAYAUDIOTARGET}, if it is defined."
 	print "                           --host will override this environment"
 	print "                           variable."
-	print "       -16                 Resample the output resolution to 16bit."
 	print "       -48                 Resample the output sample rate to 48KHz"
 	print "       -96                 Resample the output sample rate to 96KHz"
 	print ""
@@ -51,22 +50,27 @@ function usage()
 	exit 0
 }
 
-function sox_instructions()
+function install_instructions()
 {
-	print "The command \"sox\" must be installed on both this computer."
-	print "and the remote computer targeted by \${RPLAYAUDIOTARGET} (${RPLAYAUDIOTARGET})."
-	print "This may be in your package management system as simply \"sox\"."
+	if [[ "$1" == "ffmpeg" ]]
+	then
+		print "The command \"${1}\" must be installed on this computer."
+	else
+		print "The command \"${1}\" must be installed on the remote computer"
+		print "targeted by \${RPLAYAUDIOTARGET} (${RPLAYAUDIOTARGET})."
+	fi
+	print "This may be in your package management system as simply \"${1}\"."
 
 	if (( $+commands[dpkg] ))
 	then
 		print ""
 		print "You may be able to install it with the command:"
-		print "    sudo apt install sox"
+		print "    sudo apt install ${1}"
 	elif (( $+commands[dnf] ))
 	then
 		print ""
 		print "You may be able to install it with the command:"
-		print "    sudo dnf install sox"
+		print "    sudo dnf install ${1}"
 	elif (( $+commands[pkg] ))
 	then
 		print ""
@@ -76,11 +80,11 @@ function sox_instructions()
 	exit 1
 }
 
-function sox_installed()
+function is_installed()
 {
-	if (( ! $+commands[sox] ))
+	if (( ! $+commands[${1}] ))
 	then
-		sox_instructions
+		install_instructions ${1}
 	fi
 }
 
@@ -90,7 +94,7 @@ function ssh_ok()
 
 	if [[ "${SSHERROR}" =~ "not found" ]]
 	then
-		sox_instructions
+		install_instructions sox
 	elif [[ ! "${SSHERROR}" =~ "\/.*\/sox" ]]
 	then
 		print "${SSHERROR}"
@@ -114,14 +118,13 @@ do
 			shift 1
 			RPLAYAUDIOTARGET="${1}"
 			;;
-		"-16")
-			bitrate="-b16"
-			;;
 		"-48")
-			samplerate="-r48k"
+			resamp="-af"
+			resampo="aresample=48000:resampler=soxr:precision=28"
 			;;
 		"-96")
-			samplerate="-r96k"
+			resamp="-af"
+			resampo="aresample=96000:resampler=soxr:precision=28"
 			;;
 		"--diagnostics")
 			DIAGNOSTICS=yes
@@ -138,7 +141,7 @@ then
 	print "remaining parameters: $@"
 fi
 
-sox_installed
+is_installed ffmpeg
 ssh_ok ${RPLAYAUDIOTARGET}
 
 if [[ "${0}" =~ "rvolumeup$" ]]
@@ -148,5 +151,8 @@ elif [[ "${0}" =~ "rvolumedown$" ]]
 then
 	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
 else
-	sox --combine sequence "$@" ${bitrate} ${samplerate} -S -t flac - | ssh ${RPLAYAUDIOTARGET} play -q -
+	for d in "$@"
+	do
+		ffmpeg -hide_banner -i "${d}" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -
+	done
 fi
