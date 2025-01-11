@@ -26,17 +26,18 @@ function usage()
 	print ""
 	print "       rvolumeup and rvolumedown are symlinks to rplay."
 	print ""
-	print "   Options: (all options must come before the file list)"
+	print "   Options:"
 	print "       -h | --help         This usage information."
-	print "       -host <hostname>    The target computer to send the audio"
-	print "                           stream to, or on which to issue the"
+	print "       -host | --host <hostname> The target computer to send the"
+	print "                           audio stream to, or on which to issue the"
 	print "                           volume commands. <hostname> will default"
 	print "                           to \${RPLAYAUDIOTARGET}, if it is defined."
 	print "                           --host will override this environment"
 	print "                           variable."
-	print "       -q                  Quiet. No visible console output."
-	print "       -48                 Resample the output sample rate to 48KHz"
-	print "       -96                 Resample the output sample rate to 96KHz"
+	print "       -s | --shuffle      Play the listed files in random order."
+	print "       -q | --quiet        Quiet. No visible console output."
+	print "       -48 | --48          Resample the output sample rate to 48KHz"
+	print "       -96 | --96          Resample the output sample rate to 96KHz"
 	print ""
 	print "                           Resample options are useful when sending"
 	print "                           audio to a device on which the extra detail"
@@ -109,33 +110,57 @@ function ssh_ok()
 	fi
 }
 
+function shuffle_tracks
+{
+	## i'm sure this could be more efficient as it randomizes half the elements twice, but who cares?
+	for ((i = 1; i <= index; i++))
+	do
+		local ri=$RANDOM
+		(( ri = (ri % index) + 1 ))
+		local current="${tracks[${i}]}"
+		tracks[${i}]="${tracks[${ri}]}"
+		tracks[${ri}]="${current}"
+	done
+}
+
 quiet=
 rsamp=
 rsampo=
+shuffle=
+typeset -A tracks
+index=1
 
-while [[ "$1" =~ '^-' ]]
+#while [[ "$1" =~ '^-' ]]
+while [[ "$1" ]]
 do
 	case "${1}" in
 		"-h" | "--help")
 			usage
 			;;
-		"-host")
+		"-host" | "--host")
 			shift 1
 			RPLAYAUDIOTARGET="${1}"
 			;;
-		"-q")
+		"-q" | "--quiet")
 			quiet="-q"
 			;;
-		"-48")
+		"-s" | "--shuffle")
+			shuffle="shuffle"
+			;;
+		"-48" | "--48")
 			resamp="-af"
 			resampo="aresample=48000:resampler=soxr:precision=28"
 			;;
-		"-96")
+		"-96" | "--96")
 			resamp="-af"
 			resampo="aresample=96000:resampler=soxr:precision=28"
 			;;
 		"--diagnostics")
 			DIAGNOSTICS=yes
+			;;
+		* )
+			tracks[${index}]="${1}"
+			(( index ++ ))
 			;;
 	esac
 	shift 1
@@ -159,8 +184,13 @@ elif [[ "${0}" =~ "rvolumedown$" ]]
 then
 	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
 else
-	for d in "$@"
+	if [[ ${shuffle} ]]
+	then
+		shuffle_tracks
+	fi
+
+	for ((i = 1; i <= index; i++))
 	do
-		ffmpeg -hide_banner -i "${d}" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play ${quiet} -
+		ffmpeg -hide_banner -i "$tracks[${i}]" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -t flac ${quiet} -
 	done
 fi
