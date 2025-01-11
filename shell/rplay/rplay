@@ -34,6 +34,7 @@ function usage()
 	print "                           to \${RPLAYAUDIOTARGET}, if it is defined."
 	print "                           --host will override this environment"
 	print "                           variable."
+	print "       -q                  Quiet. No visible console output."
 	print "       -48                 Resample the output sample rate to 48KHz"
 	print "       -96                 Resample the output sample rate to 96KHz"
 	print ""
@@ -42,8 +43,8 @@ function usage()
 	print "                           will be lost (e.g. most integrated DAC "
 	print "                           devices will likely not benefit noticably"
 	print "                           from anything more than 16bit/48KHz digital"
-	print "                           so there is no real point in sending that"
-	print "                           much data over the network)."
+	print "                           so there is no real point in sending more"
+	print "                           than that over the network)."
 	print ""
 	print "   Regardless of the original audio type, rplay will encode the stream "
 	print "   as flac to reduce network bandwidth. This has very little cpu cost."
@@ -108,6 +109,10 @@ function ssh_ok()
 	fi
 }
 
+quiet=
+rsamp=
+rsampo=
+
 while [[ "$1" =~ '^-' ]]
 do
 	case "${1}" in
@@ -117,6 +122,9 @@ do
 		"-host")
 			shift 1
 			RPLAYAUDIOTARGET="${1}"
+			;;
+		"-q")
+			quiet="-q"
 			;;
 		"-48")
 			resamp="-af"
@@ -153,6 +161,6 @@ then
 else
 	for d in "$@"
 	do
-		ffmpeg -hide_banner -i "${d}" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -
+		ffmpeg -hide_banner -i "${d}" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play ${quiet} -
 	done
 fi
