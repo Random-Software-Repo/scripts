@@ -97,7 +97,7 @@ function is_installed()
 
 function ssh_ok()
 {
-	local SSHERROR=$(ssh -o ConnectTimeout=1 -o BatchMode=yes ${RPLAYAUDIOTARGET} which sox 2>&1 )
+	local SSHERROR=$(ssh -o ConnectTimeout=2 -o BatchMode=yes ${RPLAYAUDIOTARGET} which sox 2>&1 )
 
 	if [[ "${SSHERROR}" =~ "not found" ]]
 	then
