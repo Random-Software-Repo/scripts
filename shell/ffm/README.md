@@ -8,15 +8,21 @@ Ffm requires **ffmpeg** and **zsh**. Both of these are usually avalable in the s
 
 ### Redhat / Fedora and derivatives:
 
+```
 	sudo dnf install ffmpeg zsh
+```
 
 ### Debian, Ubuntu and derivatives:
 
+```
 	sudo apt-get install ffmpeg zsh
+```
 
 ### FreeBSD:
 
+```
 	sudo pkg install zsh
+```
 
 Other distributions will use their own particular package manager but will probably have a similar command.
 
@@ -26,22 +32,35 @@ For other operating systems, you can get **ffmpeg** at https://ffmpeg.org and **
 
 To install ffm and all the alternate links (x264, etc.) into /usr/local/bin, run the command:
 
+```
 	sudo make install 
+```
 
 Alternately, you can run:
 
+```
 	make install dir=<alternate directory>
+```
 
-which will install ffm and all the alternate links into <alternate directory> instead. Simply run make:
+which will install ffm and all the alternate links into <alternate directory> instead. 
 
+
+For more infomration on installation, simply run make:
+
+```
 	make
+```
 
-for more install guidance.
+### Note for FreeBSD (and other BSDs)
+
+The installation requires gmake rather than the standard bsd make. Substitute `gmake` for all references to `make` above.
 
 ## Usage
 
 Run:
 
+```
 	ffm -h
+```
 
 for options and general usage information.

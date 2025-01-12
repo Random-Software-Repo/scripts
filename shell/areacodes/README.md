@@ -7,20 +7,30 @@ Areacode depends on a text database of areacodes. This is downloaded via the upd
 ## Installation
 
 To install the areacode script into /usr/local/bin and it's corresponding data file into /usr/local/share/areacodes/areacodes, run the commands:
+
 ```
 ./update_areacodes
 sudo make install 
 ```
 
+Alternately, you can run:
+
+```
+	make install dir=<alternate directory>
+```
+
+which will install both the areacode script and datafiles into <alternate directory>.
+
 For more information on installing, run
+
 ```
 make
 ```
 
-
 ## Usage
 
 Run:
+
 ```
 	areacode <info>
 ```
