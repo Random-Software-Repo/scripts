@@ -182,16 +182,8 @@ fi
 is_installed ffmpeg
 ssh_ok ${RPLAYAUDIOTARGET}
 
-if [[ "${0}" =~ "rvolumeup$" ]]
+if [[ "${0}" =~ "rplay$" ]]
 then
-	ssh ${RPLAYAUDIOTARGET} mixer vol=+10%
-elif [[ "${0}" =~ "rvolumedown$" ]]
-then
-	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
-elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
-then
-	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
-else
 	if [[ ${shuffle} ]]
 	then
 		shuffle_tracks
@@ -201,4 +193,13 @@ else
 	do
 		ffmpeg -hide_banner -i "$tracks[${i}]" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -t flac ${quiet} -
 	done
+elif [[ "${0}" =~ "rvolumeup$" ]]
+then
+	ssh ${RPLAYAUDIOTARGET} mixer vol=+10%
+elif [[ "${0}" =~ "rvolumedown$" ]]
+then
+	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
+elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
+then
+	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
 fi
