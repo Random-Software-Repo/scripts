@@ -3,9 +3,10 @@ include ../../MakefileShebangs.mk
 .PHONY: all install uninstall locate
 
 PROGRAMS = rplay
+SYMLINKS = rvolumeup rvolumedown renterprise rnoise
 
 default:
-	@echo "Installs $(PROGRAMS) into /usr/local/bin."
+	@echo "Installs $(PROGRAMS) and $(SYMLINKS) into /usr/local/bin."
 	@echo ""
 	@echo "To install run:"
 	@echo "	make install [dir=<optional target directory>]"
@@ -19,10 +20,10 @@ default:
 install: setup
 	cd $(WORKING);cp -f $(PROGRAMS) "$(dir)/"
 	cd "$(dir)"; chmod 755 $(PROGRAMS) 
-	cd "$(dir)";ln -sf "./$(PROGRAMS)" "./rvolumeup"
-	cd "$(dir)";ln -sf "./$(PROGRAMS)" "./rvolumedown"
-
+	@for link in $(SYMLINKS); do \
+		cd "$(dir)";ln -sf "./$(PROGRAMS)" "$$link"; \
+	done
 	
 uninstall:
-	cd "$(dir)"; rm -f $(PROGRAMS) rvolumeup rvolumedown
+	cd "$(dir)"; rm -f $(PROGRAMS) $(SYMLINKS)
 

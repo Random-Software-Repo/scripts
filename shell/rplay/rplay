@@ -23,6 +23,11 @@ function usage()
 	print "           rvolumeup [options]"
 	print "       or to increase the audio volume on the target:"
 	print "           rvolumedown [options]"
+	print "       or to play a kind of white noise reminescent of"
+	print "       the background drone on a certain noted starship:"
+	print "          rnoise [options]"
+	print "             or"
+	print "          renterpeise [options]"
 	print ""
 	print "       rvolumeup and rvolumedown are symlinks to rplay."
 	print ""
@@ -183,6 +188,9 @@ then
 elif [[ "${0}" =~ "rvolumedown$" ]]
 then
 	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
+elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
+then
+	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
 else
 	if [[ ${shuffle} ]]
 	then
