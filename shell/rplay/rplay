@@ -31,7 +31,7 @@ function usage()
 	print ""
 	print "       rvolumeup and rvolumedown are symlinks to rplay."
 	print ""
-	print "   Options:"
+	print "   General Options:"
 	print "       -h | --help         This usage information."
 	print "       -host | --host <hostname> The target computer to send the"
 	print "                           audio stream to, or on which to issue the"
@@ -39,6 +39,7 @@ function usage()
 	print "                           to \${RPLAYAUDIOTARGET}, if it is defined."
 	print "                           --host will override this environment"
 	print "                           variable."
+	print "   rplay only options:"
 	print "       -s | --shuffle      Play the listed files in random order."
 	print "       -q | --quiet        Quiet. No visible console output."
 	print "       -48 | --48          Resample the output sample rate to 48KHz"
@@ -51,9 +52,22 @@ function usage()
 	print "                           from anything more than 16bit/48KHz digital"
 	print "                           so there is no real point in sending more"
 	print "                           than that over the network)."
+	print "   rvolumeup and rvolumedown options:"
+	print "       <volume>%           Any value of 0% to 100%. Will set the volume"
+	print "                           to the specified amount. If the \"%\" is "
+	print "                           omitted, will set the volume as an absolute"
+	print "                           amount between 0.0 and 1.0. Any value above"
+	print "                           1 will be interpereted as 1 (100%)."
+	print "       +<volume>%          Will increase the volume by the specified"
+	print "                           amount. This is a basis amount. +20% will"
+	print "                           increase the volume from 45% to 65% if "
+	print "                           starting from 45%. The default is +10% if"
+	print "                           omitted."
+	print "       -<volume>%          As above, but decreases the volume."
 	print ""
-	print "   Regardless of the original audio type, rplay will encode the stream "
-	print "   as flac to reduce network bandwidth. This has very little cpu cost."
+	print "   Regardless of the original audio type, rplay will reencode the stream "
+	print "   as flac to reduce network bandwidth. "
+	print ""
 	exit 0
 }
 
@@ -195,10 +209,18 @@ then
 	done
 elif [[ "${0}" =~ "rvolumeup$" ]]
 then
-	ssh ${RPLAYAUDIOTARGET} mixer vol=+10%
+	if [[ "${index}" -eq 1 ]]
+	then
+		tracks[${index}]="+10%"
+	fi
+	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
 elif [[ "${0}" =~ "rvolumedown$" ]]
 then
-	ssh ${RPLAYAUDIOTARGET} mixer vol=-10%
+	if [[ "${index}" -eq 1 ]]
+	then
+		tracks[${index}]="-10%"
+	fi
+	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
 elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
 then
 	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
