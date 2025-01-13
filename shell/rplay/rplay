@@ -147,7 +147,7 @@ rsamp=
 rsampo=
 shuffle=
 typeset -A tracks
-index=1
+index=0
 
 #while [[ "$1" =~ '^-' ]]
 while [[ "$1" ]]
@@ -178,8 +178,8 @@ do
 			DIAGNOSTICS=yes
 			;;
 		* )
-			tracks[${index}]="${1}"
 			(( index ++ ))
+			tracks[${index}]="${1}"
 			;;
 	esac
 	shift 1
@@ -209,14 +209,14 @@ then
 	done
 elif [[ "${0}" =~ "rvolumeup$" ]]
 then
-	if [[ "${index}" -eq 1 ]]
+	if [[ "${index}" -eq 0 ]]
 	then
 		tracks[${index}]="+10%"
 	fi
 	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
 elif [[ "${0}" =~ "rvolumedown$" ]]
 then
-	if [[ "${index}" -eq 1 ]]
+	if [[ "${index}" -eq 0 ]]
 	then
 		tracks[${index}]="-10%"
 	fi
