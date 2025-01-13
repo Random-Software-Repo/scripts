@@ -6,6 +6,8 @@ The source computer, the one you run the `rplay` command on, must have `zsh` and
 
 When started, `rplay` will verify that `ffmpeg` is installed locally, that an ssh connection can be made to the target, and that the target has the `sox` package installed. These tests, especially the ssh connection test, can take some time, though the timeout for the ssh test is set at 2 seconds. Because the timeout is so short, you may occasionally get an error that the connection could not be made if it takes longer than the 2 seconds `rplay` is willing to wait.
 
+Though pretty nifty and useful (I use it frequently to play through a device hooked into a larger stereo system), there is no way to pause/resume/skip/fast-forward/rewind the playback. It's strictly a run-and-forget, or run-and-then-kill. Killing the process does stop playback, and though suspending the process (CTRL+Z) will suspend, there is considerable buffering and playback will *not* pause for some time. 
+
 ## Usage
 
 ```
