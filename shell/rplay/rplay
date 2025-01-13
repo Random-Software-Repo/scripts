@@ -142,6 +142,39 @@ function shuffle_tracks
 	done
 }
 
+function starship
+{
+	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
+}
+
+function volume
+{
+	if [[ "${index}" -eq 0 ]]
+	then
+		if [[ "${1}" =~ "rvolumeup$" ]]
+		then
+			tracks[${index}]="+10%"
+		else
+			tracks[${index}]="-10%"
+		fi
+	fi
+	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
+}
+
+function play
+{
+	if [[ ${shuffle} ]]
+	then
+		shuffle_tracks
+	fi
+
+	for ((i = 1; i <= index; i++))
+	do
+		ffmpeg -hide_banner -i "$tracks[${i}]" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -t flac ${quiet} -
+	done
+
+}
+
 quiet=
 rsamp=
 rsampo=
@@ -198,30 +231,11 @@ ssh_ok ${RPLAYAUDIOTARGET}
 
 if [[ "${0}" =~ "rplay$" ]]
 then
-	if [[ ${shuffle} ]]
-	then
-		shuffle_tracks
-	fi
-
-	for ((i = 1; i <= index; i++))
-	do
-		ffmpeg -hide_banner -i "$tracks[${i}]" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -t flac ${quiet} -
-	done
-elif [[ "${0}" =~ "rvolumeup$" ]]
+	play
+elif [[ "${0}" =~ "rvolume" ]]
 then
-	if [[ "${index}" -eq 0 ]]
-	then
-		tracks[${index}]="+10%"
-	fi
-	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
-elif [[ "${0}" =~ "rvolumedown$" ]]
-then
-	if [[ "${index}" -eq 0 ]]
-	then
-		tracks[${index}]="-10%"
-	fi
-	ssh ${RPLAYAUDIOTARGET} mixer vol=${tracks}
+	volume "${0}"
 elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
 then
-	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
+	starship
 fi
