@@ -50,7 +50,7 @@ rplay can be invoked through several symlinks to do *other* things. The most lik
 	$ rvolumedown --host <target>
 ```
 
-Each invocation will adjust the volume up or down by 10 percentage points.
+Each invocation will adjust the volume up or down by 10 percentage points. You can specify a value to set the volume to, but the format of the value depends on the avalaible tool to change the volume. This differs between FreeBSD and Linux and possibly between distros. See `rplay -h` for more information.
 
 ## Other Usage
 
