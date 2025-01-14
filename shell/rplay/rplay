@@ -185,7 +185,7 @@ function volume
 		av="${tracks}"
 		mv="${tracks}"
 	fi
-	ssh ${RPLAYAUDIOTARGET} 'am=$(command -v amixer);mm=$(command -v mixer); if [ $am ]; then amixer sset Master '${av}'; elif [ $mm ]; then mixer vol='${mv}'; else echo "Neither amixer nor mixer are present and so we cannot change the volume using either of those commands.";fi'
+	ssh ${RPLAYAUDIOTARGET} '/bin/sh am=$(command -v amixer);mm=$(command -v mixer); if [ $am ]; then amixer sset Master '${av}'; elif [ $mm ]; then mixer vol='${mv}'; else echo "Neither amixer nor mixer are present and so we cannot change the volume using either of those commands.";fi'
 }
 
 function play
