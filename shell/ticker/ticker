@@ -1,4 +1,5 @@
 #!/usr/bin/zsh
+
 zmodload zsh/pcre
 setopt REMATCH_PCRE
 

@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 ## PMV more or less is the same as mv, but will make some assumptions about the final parameter
 ## given and how it relates the the directory defined in $PORTALM.
 ## If the final parameter is not a directory, but is a subdirectory within $PORTALM, then the subdirectory within $PORTALM will be used instead

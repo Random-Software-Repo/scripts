@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 # kills and disables baloo and tracker indexing services for kde and gnome respectively.
 
 #must be run as a user, but some parts require sudo

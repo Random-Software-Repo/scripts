@@ -1,4 +1,5 @@
 #!/usr/bin/zsh
+
 SLEEP=0.01
 
 function 	slowprint()

@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 	####
 	#### renames a list of files or directories by pre-pending a string to the
 	#### file names. the pre-pend operation will only affect the file name or 

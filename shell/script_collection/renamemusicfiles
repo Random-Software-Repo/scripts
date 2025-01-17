@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 # renames mp3, ogg, opus and flac files based on a hard coded pattern
 # the pattern is:
 #

@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 #set null glob opton so if we attempt to run "convertgpx *.gpx" it won't throw an error
 setopt null_glob
 

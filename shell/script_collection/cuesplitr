@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+
 for d in **/*.flac
 do
 	if [[ -e "${d:r}.cue" ]]

@@ -1,6 +1,7 @@
 #!/usr/bin/zsh
 
 
+
 for favfile in "$@"
 do	
 	favpath="${favfile:h}"
