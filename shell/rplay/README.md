@@ -1,6 +1,17 @@
 # RPLAY
 
-`rplay` plays audio files of nearly any format from one computer (the source), to any remote computer (the target) you care to use. This is done using `ffmpeg` to convert audio files to a `flac` stream which is, uh, streamed via `ssh` to the target computer and played on the default audio device via the `play` command (an alias for the `sox` command).
+`rplay` plays audio files of nearly any format from one computer (the source), to any remote computer (the target) with minimal configuration requirements and using only commonly available software (software that is pre-packaged on at least FreeBSD and all or nearly all Linux distributions). 
+
+Rplay requires:
+
+ - zsh
+ - ffmpeg
+ - ssh
+ - sox
+
+ That's it. Configuration is limited to installing those packages, creating an ssh key, and copying the public portion of the key to the target server. 
+
+Rplay works by using `ffmpeg` to convert one or more audio files to a `flac` stream which is, uh, streamed via `ssh` to the target computer and played on the default audio device via the `play` command (a variation of the `sox` command).
 
 The source computer, the one you run the `rplay` command on, must have `zsh` and `ffmpeg` installed, and the target computer must have an `ssh` server running, a working default audio output device, and the `sox` package installed. You should have an ssh key copied to the target (goo\^w search ***ssh-copy-id***), otherwise using `rplay` will require *frequent* passwords as every single file played is through a separate ssh connection.
 
@@ -50,11 +61,11 @@ rplay can be invoked through several symlinks to do *other* things. The most lik
 	$ rvolumedown --host <target>
 ```
 
-Each invocation will adjust the volume up or down by 10 percentage points. You can specify a value to set the volume to, but the format of the value depends on the avalaible tool to change the volume. This differs between FreeBSD and Linux and possibly between distros. See `rplay -h` for more information.
+Each invocation will adjust the volume up or down by 10 percentage points. You can specify a value to set the volume to, but the format of the value depends on the avalaible tool to change the volume. This differs between FreeBSD and Linux and possibly between different Linux distributions. See `rplay -h` for more information.
 
 ## Other Usage
 
-rplay can also be invoked via the `rnoise` and `renterprise` symlinks. These both do the same thing: play a low frequency white noise reminiscent of the background drone on a certain well know fictional starship from the second series of as well known science-fiction franchise.
+rplay can also be invoked via the `rnoise` and `renterprise` symlinks. These both do the same thing: play a low frequency white noise reminiscent of the background drone on a certain well know fictional starship from the second series of a well known science-fiction franchise.
 
 ```
 	$ rnoise --host <target>
@@ -65,16 +76,61 @@ rplay can also be invoked via the `rnoise` and `renterprise` symlinks. These bot
 
 ## Installation
 
-### Linux
+ - Linux
 
 ```
-	sudo make install
+	$ sudo make install
 ```
 
-### FreeBSD
+ - FreeBSD
 
 ```
-	sudo gmake install
+	$ sudo gmake install
 ```
 
 Installation will install the rplay script and symlinks in `/usr/local/bin/`
+
+## Setup
+
+1) Install zsh and ffmpeg on the source computer.
+
+ - On FreeBSD:
+
+ ```
+ 	$ sudo pkg install zsh ffmpeg
+ ```
+
+ - On Debian Linux:
+
+ ```
+ 	$ sudo apt install zsh ffmpeg
+ ```
+
+2) Ensure an ssh server is installed and running on the target computer, and that you are authorized to login to this computer. This is probably already done, but is completely beyond the scope of this document. 
+
+3) Install sox on the target computer:
+
+ - On FreeBSD:
+
+ ```
+ 	$ sudo pkg install sox
+ ```
+
+ - On Debian Linux:
+
+ ```
+ 	$ sudo apt install sox
+ ```
+
+4) Create an ssh key on the source computer if you have not already done so:
+
+ ```
+ 	$ ssh-key-gen
+ ```
+
+5) Copy the public key to the target computer
+
+ ```
+ 	$ ssh-copy-id <username>@<target computer>
+ ```
+
