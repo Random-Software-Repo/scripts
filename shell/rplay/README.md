@@ -19,6 +19,8 @@ When started, `rplay` will verify that `ffmpeg` is installed locally, that an ss
 
 Though pretty nifty and useful (I use it frequently to play through a device hooked into a larger stereo system), there is no way to pause/resume/skip/fast-forward/rewind the playback. It's strictly a run-and-forget, or run-and-then-kill. Killing the process does stop playback, and though suspending the process (CTRL+Z) will suspend, there is considerable buffering and playback will *not* pause for some time. 
 
+If you use beets for audio file management, rplay also installs two helpers: `bp` and `bps` (a symlink to bp). `bp` will invoke `beet list -f "\$path"` returning file paths which will then be passed on to `rplay`. bps will do the same but shuffle the results. Both bp and bps will pass ***all*** additional command line parameters to `beet list`, becoming your beet search criteria. Both will also ***only*** play to the host defined in RPLAYAUDIOTARGET, so that must be defined.
+
 ## Usage
 
 ```

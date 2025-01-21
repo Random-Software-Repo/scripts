@@ -2,11 +2,14 @@ include ../../MakefileShebangs.mk
 
 .PHONY: all install uninstall locate
 
-PROGRAMS = rplay
+PROGRAMS = rplay bp
 SYMLINKS = rvolumeup rvolumedown renterprise rnoise
+BPPROGRAM = bp
+RPROGRAM = rplay
+BPSYMLINK = bps
 
 default:
-	@echo "Installs $(PROGRAMS) and $(SYMLINKS) into /usr/local/bin."
+	@echo "Installs $(PROGRAMS), $(SYMLINKS), and $(BPSYMLINK) into /usr/local/bin."
 	@echo ""
 	@echo "To install run:"
 	@echo "	make install [dir=<optional target directory>]"
@@ -21,9 +24,14 @@ install: setup
 	cd $(WORKING);cp -f $(PROGRAMS) "$(dir)/"
 	cd "$(dir)"; chmod 755 $(PROGRAMS) 
 	@for link in $(SYMLINKS); do \
-		cd "$(dir)";ln -sf "./$(PROGRAMS)" "$$link"; \
+		cd "$(dir)";ln -sf "./$(RPROGRAM)" "$$link"; \
+	done
+	cd $(WORKING);cp -f $(BPPROGRAM) "$(dir)/"
+	cd "$(dir)"; chmod 755 $(BPPROGRAM) 
+	@for link in $(BPSYMLINK); do \
+		cd "$(dir)";ln -sf "./$(BPPROGRAM)" "$$link"; \
 	done
 	
 uninstall:
-	cd "$(dir)"; rm -f $(PROGRAMS) $(SYMLINKS)
+	cd "$(dir)"; rm -f $(PROGRAMS) $(SYMLINKS) $(BPSYMLINK)
 

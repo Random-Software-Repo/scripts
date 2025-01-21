@@ -1,0 +1,20 @@
+#!/usr/bin/zsh
+
+tracks=()
+shuffle=
+if [[ "$0" =~ "bps$" ]]
+then
+	shuffle="--shuffle"
+fi
+
+beet list -f "\$path" "$@" | while read LINE
+do
+	tracks+=( "$LINE" )
+done
+
+if [[ ${#tracks} -gt 0 ]]
+then
+	rplay ${shuffle} --host ${RPLAYAUDIOTARGET} "${tracks[@]}"
+else
+	echo "No matches to "$@""
+fi
