@@ -14,7 +14,7 @@ done
 
 if [[ ${#tracks} -gt 0 ]]
 then
-	rplay ${shuffle} --host ${RPLAYAUDIOTARGET} "${tracks[@]}"
+	rplay ${shuffle} "${tracks[@]}"
 else
 	echo "No matches to "$@""
 fi
