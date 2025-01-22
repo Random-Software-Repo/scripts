@@ -31,8 +31,9 @@ fi
 
 sourcetext=
 text=
+index=1
 
-while [[ "${1}" ]]
+while [[ "$index" -le "$#" ]]
 do
 	if [[ ! -n ${sourcetext} ]]
 	then
@@ -59,4 +60,5 @@ do
 		fi
 	fi
 	shift
+	(( index++ ))
 done;
