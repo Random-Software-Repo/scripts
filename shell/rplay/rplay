@@ -256,6 +256,11 @@ eval "rplayparams=($RPLAYPARAMETERS)"
 check_params $rplayparams
 check_params "$@"
 
+if [[ $index -eq 0 ]]
+then
+	usage
+fi
+
 if [[ -n "${DIAGNOSTICS}" ]]
 then
 	print "audiotarget:${RPLAYAUDIOTARGET}"
