@@ -1,5 +1,32 @@
 #!/usr/bin/zsh
 
+if [[ "$#" -eq 0 ]]
+then
+	echo "    bp and bps retrieve a file list from beets (beet)"
+	echo "    and use rplay to remotely play them. bp plays the "
+	echo "    tracks in listing order, while bps will play them"
+	echo "    in a random order (shuffle)."
+	echo ""
+	echo "    Usage:"
+	echo "        bp <beet search criteria>"
+	echo "      or"
+	echo "        bps <beet search criteria>"
+	echo ""
+	echo "    bp and bps will call beet with the options '-f \$file'."
+	echo "    You will provide the search criteria to find the tracks"
+	echo "    desited. For example, to play all tracks from disc 1 of"
+	echo "    an album named 'Namaste', you might enter:"
+	echo "        bp album:Namaste disc:01 "
+	echo ""
+	echo "    All the command line options provided to bp or bps"
+	echo "    will be passed unchanged to the beet command. As"
+	echo "    such, no options will be passed to rplay."
+	echo "    To provide options to rplay use the environment"
+	echo "    variable RPLAYPARAMETERS (see 'rplay -h' for details)."
+	echo ""
+	exit
+fi
+
 tracks=()
 shuffle=
 if [[ "$0" =~ "bps$" ]]
@@ -7,7 +34,7 @@ then
 	shuffle="--shuffle"
 fi
 
-beet list -f "\$path" "$@" | while read LINE
+beet list -f '$path' "$@" | while read LINE
 do
 	tracks+=( "$LINE" )
 done
