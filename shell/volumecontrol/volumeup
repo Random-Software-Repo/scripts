@@ -1,0 +1,51 @@
+#!/usr/bin/zsh
+
+if [[ "${0}" =~ "volumedown$" ]]
+then
+	# if the command name was volumedown then default to -10%
+	vadj=-10
+else
+	# the command name was volumeup (or, at least *not* volumedown)
+	# default volume adjustment of +10%
+	vadj=10
+fi
+
+if [[ "${1}" =~ '^[-+]{0,1}[0-9]+$' ]]
+then
+	#echo "setting vadj to \"$1\""
+	vadj="${1}"
+else
+	if [[ "${1}" ]]
+	then
+		echo "${1} is not numeric. Volume can only be adjusted in integer amounts (+ or -)."
+		exit -1
+	fi
+fi
+
+if [[ +$commands(amixer) ]]
+then
+	#echo "amixer"
+	if [[ "${vadj}" -lt 0 ]]
+	then
+		(( vadj = vadj * -1 ))
+		#echo amixer sset Master "${vadj}%-"
+		amixer sset Master "${vadj}%-"
+	else
+		#echo amixer sset Master "${vadj}%+"
+		amixer sset Master "${vadj}%+"
+	fi
+elif [[ +$commands(mixer) ]]
+then
+	#echo "mixer"
+	if [[ "${1}" -lt 0 ]]
+	then
+		(( vadj = vadj * -1 ))
+		#echo mixer vol="-${vadj}%"
+		mixer vol="-${vadj}%"
+	else
+		#echo mixer vol="+${vadj}%"
+		mixer vol="+${vadj}%"
+	fi
+else
+	echo "Neither amixer nor mixer is present, and so we cannot change the volume using either of those commands.";
+fi

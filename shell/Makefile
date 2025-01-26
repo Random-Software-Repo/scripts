@@ -1,5 +1,5 @@
 
-SUBDIRS = areacodes audio2audio countrycodes ffm mp rename script_collection ticker tmuxx word
+SUBDIRS = areacodes audio2audio countrycodes ffm mp rename script_collection ticker tmuxx volumecontrol word
 TOPTARGETS := install uninstall
 .PHONY: all $(TOPTARGETS) $(SUBDIRS)
 all:
