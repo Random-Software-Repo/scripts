@@ -163,20 +163,38 @@ function starship
 
 function volume
 {
-	local av="10%-"
-	local mv="-10%"
-	if [[ "${1}" =~ "rvolumeup$" ]]
+	if [[ "${1}" =~ "rvolumedown$" ]]
 	then
-		av="10%+"
-		mv="+10%"
+		# default VolumeADJustment to -10%
+		vadj=-10
+	else
+		vadj=10
 	fi
 
-	if [[ "${index}" -ne 0 ]]
+	if [[ "${2}" =~ '^[-+]{0,1}[0-9]+$' ]]
 	then
-		av="${tracks}"
-		mv="${tracks}"
+		vadj="${2}"
+	else
+		if [[ "${2}" ]]
+		then
+			echo "${2} is not numeric. Volume can only be adjusted in integer amounts (+ or -)."
+			exit -1
+		fi
 	fi
-	ssh ${RPLAYAUDIOTARGET} '/bin/sh am=$(command -v amixer);mm=$(command -v mixer); if [ $am ]; then amixer sset Master '${av}'; elif [ $mm ]; then mixer vol='${mv}'; else echo "Neither amixer nor mixer are present and so we cannot change the volume using either of those commands.";fi'
+
+	if [[ "${vadj}" -lt 0 ]]
+	then
+		(( vadj = vadj * -1 ))
+		amixer="${vadj}%-"
+		mixer="-${vadj}%"
+	else
+		(( vadj = vadj * 1 ))
+		amixer="${vadj}%+"
+		mixer="+${vadj}%"
+	fi
+
+	ssh ${RPLAYAUDIOTARGET} '/bin/sh am=$(command -v amixer);mm=$(command -v mixer); if [ $am ]; then amixer sset Master '${amixer}'; elif [ $mm ]; then mixer vol='${mixer}'; else echo "Neither amixer nor mixer are present and so we cannot change the volume using either of those commands.";fi'
+
 }
 
 function play
@@ -239,7 +257,10 @@ check_params "$@"
 
 if [[ $index -eq 0 ]]
 then
-	usage
+	if [[ "${0}" =~ "rplay" ]]
+	then
+		usage
+	fi
 fi
 
 if [[ -n "${DIAGNOSTICS}" ]]
@@ -258,7 +279,7 @@ then
 	play
 elif [[ "${0}" =~ "rvolume" ]]
 then
-	volume "${0}"
+	volume "${0}" "${tracks}"
 elif [[ "${0}" =~ "rnoise$" || "${0}" =~ "renterprise$" ]]
 then
 	starship
