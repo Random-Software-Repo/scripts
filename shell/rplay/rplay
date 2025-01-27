@@ -60,30 +60,16 @@ function usage()
 	print "   rvolumeup and rvolumedown options:"
 	print "       <volume>            The value for <volume> defaults to a relative"
 	print "                           amount of ±10%, but an alternate value can be"
-	print "                           provided. This value depends on the mechanism"
-	print "                           available for changing the volume. Rplay can use"
-	print "                           either of two methods: \"amixer\" or \"mixer\""
-	print "                           Linux systems will probably have amixer, whilst"
-	print "                           FreeBSD (at least) will have mixer. rvolumeup and"
-	print "                           down will detect this but it is still the"
-	print "                           responsibility of the user to correctly format any"
-	print "                           values other than the defaults."
-	print "                           Mixer can take a single option of:"
-	print "                            <number>   between 0.0 and 1.0 which sets the"
-	print "                                       volume to a level between zero (mute)"
-	print "                                       and 100%"
-	print "                            <number>%  between 0 and 100 which sets the volume"
-	print "                                       to that level"
-	print "                            +<number>% Increases the volume by the percentage"
-	print "                            -<number>% Increases the volume by the percentage"
-	print "                           Amixer can take a single option of:"
-	print "                            <number>   between 0 and 65536 which sets the"
-	print "                                       volume to a level between zero (mute)"
-	print "                                       and 100%"
-	print "                            <number>%  between 0 and 100 which sets the volume"
-	print "                                       to that level"
-	print "                            <number>%+ Increases the volume by the percentage"
-	print "                            <number>%- Increases the volume by the percentage"
+	print "                           provided. This value is a integeral percentage"
+	print "                           amount the volume will be increased (positive"
+	print "                           integers) or decreased (negative integers)."
+	print "                           For example '+4' or '4' will increase the"
+	print "                           volume by 4%, while '-17' will decrease the"
+	print "                           volume by 17%. This percentage is in basis"
+	print "                           points. That is, if the volume is currently at"
+	print "                           60%, a change of -5% will set the volume to"
+	print "                           55%. Decreasing the volume by -100 will mute"
+	print "                           effectively."
 	print ""
 	print "   Any option can have default value set by exporting the variable RPLAYPARAMETERS"
 	print "   as a string containing the desited options. For example:"
@@ -199,12 +185,14 @@ function play
 	then
 		shuffle_tracks
 	fi
-
+	# create a non-associative array of files in order
+	local files=()
 	for ((i = 1; i <= index; i++))
-	do
-		ffmpeg -hide_banner -i "$tracks[${i}]" -v quiet -nostats ${resamp} ${resampo} -map 0:a:0 -vn -c:a flac -f flac pipe:1|ssh crow play -t flac ${quiet} -
+	do 
+		files+=(${tracks[${i}]})
 	done
 
+	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} -t flac -| ssh ${RPLAYAUDIOTARGET} sox ${quiet} -t flac - -d
 }
 
 function check_params()
@@ -225,13 +213,8 @@ function check_params()
 			"-s" | "--shuffle")
 				shuffle="shuffle"
 				;;
-			"-48" | "--48")
-				resamp="-af"
-				resampo="aresample=48000:resampler=soxr:precision=28"
-				;;
-			"-96" | "--96")
-				resamp="-af"
-				resampo="aresample=96000:resampler=soxr:precision=28"
+			"-48" | "--48" | "-96" | "--96")
+				samplerate="-r$(echo "${1}"|grep -o "[0-9].")k"
 				;;
 			"--diagnostics")
 				DIAGNOSTICS=yes
@@ -245,9 +228,7 @@ function check_params()
 	done	
 
 }
-quiet=
-rsamp=
-rsampo=
+quiet=-S
 shuffle=
 typeset -A tracks
 index=0
@@ -269,7 +250,7 @@ then
 	exit
 fi
 
-is_installed ffmpeg
+is_installed sox
 ssh_ok ${RPLAYAUDIOTARGET}
 
 if [[ "${0}" =~ "rplay$" ]]

@@ -5,17 +5,16 @@
 Rplay requires:
 
  - zsh
- - ffmpeg
  - ssh
  - sox
 
  That's it. Configuration is limited to installing those packages, creating an ssh key, and copying the public portion of the key to the target server. 
 
-Rplay works by using `ffmpeg` to convert one or more audio files to a `flac` stream which is, uh, streamed via `ssh` to the target computer and played on the default audio device via the `play` command (a variation of the `sox` command).
+Rplay works by using `sox` to convert one or more audio files to a `flac` stream which is, uh, streamed via `ssh` to the target computer and played on the default audio device via the `play` command (itself a variation of the `sox` command).
 
-The source computer, the one you run the `rplay` command on, must have `zsh` and `ffmpeg` installed, and the target computer must have an `ssh` server running, a working default audio output device, and the `sox` package installed. You should have an ssh key copied to the target (goo\^w search ***ssh-copy-id***), otherwise using `rplay` will require *frequent* passwords as every single file played is through a separate ssh connection.
+The source computer, the one you run the `rplay` command on, must have `zsh` and `sox` installed, and the target computer must have an `ssh` server running, a working default audio output device, and the `sox` package installed. You should have an ssh key copied to the target (goo\^w search ***ssh-copy-id***), otherwise using `rplay` will require entering your passphrase several times.
 
-When started, `rplay` will verify that `ffmpeg` is installed locally, that an ssh connection can be made to the target, and that the target has the `sox` package installed. These tests, especially the ssh connection test, can take some time, though the timeout for the ssh test is set at 2 seconds. Because the timeout is so short, you may occasionally get an error that the connection could not be made if it takes longer than the 2 seconds `rplay` is willing to wait.
+When started, `rplay` will verify that `sox` is installed locally, that an ssh connection can be made to the target, and that the target has the `sox` package installed. These tests, especially the ssh connection test, can take some time, though the timeout for the ssh test is set at 2 seconds. Because the timeout is so short, you may occasionally get an error that the connection could not be made if it takes longer than the 2 seconds `rplay` is willing to wait.
 
 Though pretty nifty and useful (I use it frequently to play through a device hooked into a larger stereo system), there is no way to pause/resume/skip/fast-forward/rewind the playback. It's strictly a run-and-forget, or run-and-then-kill. Killing the process does stop playback, and though suspending the process (CTRL+Z) will suspend, there is considerable buffering and playback will *not* pause for some time. 
 
