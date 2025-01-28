@@ -87,7 +87,7 @@ function usage()
 
 function install_instructions()
 {
-	if [[ "$1" == "ffmpeg" ]]
+	if [[ "${2}" ]]
 	then
 		print "The command \"${1}\" must be installed on this computer."
 	else
@@ -110,16 +110,26 @@ function install_instructions()
 	then
 		print ""
 		print "You may be able to install it with the command:"
-		print "    sudo pkg install sox"
+		print "    sudo pkg install ${1}"
 	fi
+
+	if [[ "$2" ]]
+	then
+		print ""
+		print "Additionally, to enable playback for most audio file"
+		print "types, you may need to install additional packages for"
+		print "${1}. These additional packages may be installable using"
+		print "the package name \"${2}\", or something similar."
+	fi
+	print ""
 	exit 1
 }
 
-function is_installed()
+function is_sox_installed()
 {
-	if (( ! $+commands[${1}] ))
+	if (( ! $+commands[sox] ))
 	then
-		install_instructions ${1}
+		install_instructions sox libsox-fmt-all
 	fi
 }
 
@@ -271,7 +281,7 @@ then
 	exit
 fi
 
-is_installed sox
+is_sox_installed
 ssh_ok ${RPLAYAUDIOTARGET}
 
 if [[ "${0}" =~ "rplay$" ]]
