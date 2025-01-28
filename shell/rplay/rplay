@@ -47,8 +47,12 @@ function usage()
 	print "   rplay only options:"
 	print "       -s | --shuffle      Play the listed files in random order."
 	print "       -q | --quiet        Quiet. No visible console output."
-	print "       -48 | --48          Resample the output sample rate to 48KHz"
-	print "       -96 | --96          Resample the output sample rate to 96KHz"
+	print "       -16 | --16 | -24 | --24"
+	print "                           Set the sample bit depth to the specified"
+	print "                           bit depth (defaults to 24bit)"
+	print "       -48 | --48 | -96 | --96"
+	print "                           Resample the output to the specified rate"
+	print "                           in kilo-hertz (kHz). No default."
 	print ""
 	print "                           Resample options are useful when sending"
 	print "                           audio to a device on which the extra detail"
@@ -219,8 +223,9 @@ function play
 	do 
 		files+=(${tracks[${i}]})
 	done
+	#echo "	sox --combine sequence $files[@] ${bitrate} ${samplerate} ${quiet} -t flac - | ssh ${RPLAYAUDIOTARGET} play ${quiet} -t flac -"
 
-	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} -t flac -| ssh ${RPLAYAUDIOTARGET} sox ${quiet} -t flac - -d
+	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} -t flac - | ssh ${RPLAYAUDIOTARGET} play -q -t flac -
 }
 
 function check_params()
@@ -241,6 +246,9 @@ function check_params()
 			"-s" | "--shuffle")
 				shuffle="shuffle"
 				;;
+			"-16" | "--16" | "-24" | "--24")
+				bitrate="-b$(echo "${1}"|grep -o "[0-9].")"
+				;;
 			"-48" | "--48" | "-96" | "--96")
 				samplerate="-r$(echo "${1}"|grep -o "[0-9].")k"
 				;;
@@ -256,6 +264,8 @@ function check_params()
 	done	
 
 }
+
+bitrate=-b24
 quiet=-S
 shuffle=
 typeset -A tracks
