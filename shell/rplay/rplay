@@ -223,9 +223,8 @@ function play
 	do 
 		files+=(${tracks[${i}]})
 	done
-	#echo "	sox --combine sequence $files[@] ${bitrate} ${samplerate} ${quiet} -t flac - | ssh ${RPLAYAUDIOTARGET} play ${quiet} -t flac -"
 
-	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} -t flac - | ssh ${RPLAYAUDIOTARGET} play -q -t flac -
+	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} --buffer=1024 -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
 }
 
 function check_params()
