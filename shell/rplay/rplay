@@ -153,7 +153,8 @@ function shuffle_tracks
 
 function starship
 {
-	sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
+	#sox -n -t flac -r 96k -b 16 -c 2 - synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16| ssh ${RPLAYAUDIOTARGET} play -t flac ${quiet} -
+	ssh ${RPLAYAUDIOTARGET} "play -n -c1 synth whitenoise lowpass -1 120 lowpass -1 120 lowpass -1 120 gain +16"
 }
 
 function volume
