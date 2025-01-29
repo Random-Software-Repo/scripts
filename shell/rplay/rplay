@@ -1,14 +1,4 @@
 #!/usr/bin/zsh
-#
-#	Plays audio files sending the audio to a remote
-#	server defined by -host or in ${RPLAYAUDIOTARGET}
-#
-#	Requirements: ffmpeg installed on the client, and sox installed on the server
-#			Server must have audio output that works
-#			same user on both client and server 
-#			ssh keys for the user playing audio installed on the server
-#			use the rvolumeup and rvolumedown to control volume on server
-#
 
 function usage()
 {
@@ -41,26 +31,17 @@ function usage()
 	print ""
 	print "   General Options:"
 	print "       -h | --help         This usage information."
-	print "       -host | --host <hostname> The target computer to send the"
-	print "                           audio stream to, or on which to issue the"
+	print "       -host | --host <hostname> "
+	print "                           The target computer to send the audio"
+	print "                           stream to, or on which to issue the"
 	print "                           volume commands."
 	print "   rplay only options:"
 	print "       -s | --shuffle      Play the listed files in random order."
 	print "       -q | --quiet        Quiet. No visible console output."
-	print "       -16 | --16 | -24 | --24"
-	print "                           Set the sample bit depth to the specified"
-	print "                           bit depth (defaults to 24bit)"
 	print "       -48 | --48 | -96 | --96"
 	print "                           Resample the output to the specified rate"
 	print "                           in kilo-hertz (kHz). No default."
 	print ""
-	print "                           Resample options are useful when sending"
-	print "                           audio to a device on which the extra detail"
-	print "                           will be lost (e.g. most integrated DAC "
-	print "                           devices will likely not benefit noticably"
-	print "                           from anything more than 16bit/48KHz digital"
-	print "                           so there is no real point in sending more"
-	print "                           than that over the network)."
 	print "   rvolumeup and rvolumedown options:"
 	print "       <volume>            The value for <volume> defaults to a relative"
 	print "                           amount of ±10%, but an alternate value can be"
@@ -83,8 +64,8 @@ function usage()
 	print "   Any options set in RPLAYPARAMETERS will be overridden by additonal options on the"
 	print "   command line."
 	print ""
-	print "   Regardless of the original audio type, rplay will reencode the stream "
-	print "   as flac to reduce network bandwidth. "
+	print "   Regardless of the original audio type, rplay will reencode the stream as flac to"
+	print "   reduce network bandwidth. "
 	print ""
 	exit 0
 }
@@ -129,11 +110,11 @@ function install_instructions()
 	exit 1
 }
 
-function is_sox_installed()
+function is_ffmpeg_installed()
 {
-	if (( ! $+commands[sox] ))
+	if (( ! $+commands[ffmpeg] ))
 	then
-		install_instructions sox libsox-fmt-all
+		install_instructions ffmpeg
 	fi
 }
 
@@ -220,11 +201,14 @@ function play
 	# create a non-associative array of files in order
 	local files=()
 	for ((i = 1; i <= index; i++))
-	do 
-		files+=(${tracks[${i}]})
+	do
+		files+=("-i" "${tracks[${i}]}")
 	done
 
-	sox --combine sequence "$files[@]" ${bitrate} ${samplerate} ${quiet} --buffer=1024 -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
+	#sox ${quiet} --combine sequence "$files[@]" -b ${bitrate} ${samplerate} -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
+
+	ffmpeg -hide_banner  -loglevel quiet "$files[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
+
 }
 
 function check_params()
@@ -241,15 +225,14 @@ function check_params()
 				;;
 			"-q" | "--quiet")
 				quiet="-q"
+				stats=""
 				;;
 			"-s" | "--shuffle")
 				shuffle="shuffle"
 				;;
-			"-16" | "--16" | "-24" | "--24")
-				bitrate="-b$(echo "${1}"|grep -o "[0-9].")"
-				;;
 			"-48" | "--48" | "-96" | "--96")
-				samplerate="-r$(echo "${1}"|grep -o "[0-9].")k"
+				samplerateopt="-ar"
+				samplerate="$(echo "${1}"|grep -o "[0-9].")000"
 				;;
 			"--diagnostics")
 				DIAGNOSTICS=yes
@@ -264,11 +247,13 @@ function check_params()
 
 }
 
-bitrate=-b24
+stats=-stats
 quiet=-S
 shuffle=
 typeset -A tracks
 index=0
+samplerateopt=
+samplerate=
 
 eval "rplayparams=($RPLAYPARAMETERS)"
 check_params $rplayparams
@@ -285,12 +270,12 @@ fi
 if [[ -n "${DIAGNOSTICS}" ]]
 then
 	print "audiotarget:${RPLAYAUDIOTARGET}"
-	print "samplerate:${resampo}"
+	print "samplerate:${samplerateffmpeg}"
 	print "remaining parameters: $@"
 	exit
 fi
 
-is_sox_installed
+is_ffmpeg_installed
 ssh_ok ${RPLAYAUDIOTARGET}
 
 if [[ "${0}" =~ "rplay$" ]]
