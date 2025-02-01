@@ -200,15 +200,25 @@ function play
 		shuffle_tracks
 	fi
 	# create a non-associative array of files in order
-	local files=()
+	#local files=()
+	local ffmpegfiles=()
 	for ((i = 1; i <= index; i++))
 	do
-		files+=("-i" "${tracks[${i}]}")
+		ffmpegfiles+=("-i" "${tracks[${i}]}")
+		#files+=("${tracks[${i}]}")
 	done
 
-	#sox ${quiet} --combine sequence "$files[@]" -b ${bitrate} ${samplerate} -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
+	## sox | sox (play)
+	##sox ${quiet} --combine sequence "$files[@]" -b ${bitrate} ${samplerate} -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
 
-	ffmpeg -hide_banner  -loglevel quiet "$files[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
+	## ffmpeg | sox (play)
+	ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
+
+	## ffmpeg | ffmpeg (ffplay)
+	#ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "ffplay -hide_banner -nodisp -loglevel quiet -f flac - "
+
+	## ffmpeg | mpv
+	#ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "mpv --no-terminal - "
 
 }
 
