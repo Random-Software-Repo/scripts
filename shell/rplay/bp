@@ -18,6 +18,12 @@ then
 	echo "    an album named 'Namaste', you might enter:"
 	echo "        bp album:Namaste disc:01 "
 	echo ""
+	echo "    Default options for beet can be set in the environment"
+	echo "    variable \$BEETDEFAULTS. These will be applied to all"
+	echo "    bp and bps calls. \$BEETDEFAULTS should only be match"
+	echo "    options (e.g. \"genre:rock\" or \"^genre:chirstmas\","
+	echo "    other options may have unexpected behavior."
+	echo ""
 	echo "    All the command line options provided to bp or bps"
 	echo "    will be passed unchanged to the beet command. As"
 	echo "    such, no options will be passed to rplay."
@@ -34,7 +40,10 @@ then
 	shuffle="--shuffle"
 fi
 
-beet list -f '$path' "$@" | while read LINE
+BP=()
+eval "BP=($BEETDEFAULTS)"
+
+beet list -f '$path' "$@" "${BP}" | while read LINE
 do
 	tracks+=( "$LINE" )
 done
