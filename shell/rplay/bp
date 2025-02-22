@@ -2,31 +2,33 @@
 
 if [[ "$#" -eq 0 ]]
 then
-	echo "    bp and bps retrieve a file list from beets (beet)"
-	echo "    and use rplay to remotely play them. bp plays the "
-	echo "    tracks in listing order, while bps will play them"
-	echo "    in a random order (shuffle)."
+	echo "    bp retrieves a file list from beets (beet) and calls"
+	echo "    rplay to remotely play them. bp plays the tracks in"
+	echo "    the order beet returns them."
 	echo ""
 	echo "    Usage:"
-	echo "        bp <beet search criteria>"
-	echo "      or"
-	echo "        bps <beet search criteria>"
+	echo "        bp [options] <beet search criteria>"
 	echo ""
-	echo "    bp and bps will call beet with the options '-f \$file'."
-	echo "    You will provide the search criteria to find the tracks"
-	echo "    desited. For example, to play all tracks from disc 1 of"
-	echo "    an album named 'Namaste', you might enter:"
+	echo "    Options (must be the first option/s on the command line):"
+	echo "        --shuffle    will play the tracks in random order."
+	echo "        --show       will print the paths to the tracks "
+	echo "                     before playing them."
+	echo ""
+	echo "    bp will call beet with the options \"-f '\$path'\". You will"
+	echo "    provide the search criteria to find the tracks desired."
+	echo "    For example, to play all tracks from disc 1 of an album"
+	echo "    named 'Namaste', you might enter:"
 	echo "        bp album:Namaste disc:01 "
 	echo ""
 	echo "    Default options for beet can be set in the environment"
 	echo "    variable \$BEETDEFAULTS. These will be applied to all"
-	echo "    bp and bps calls. \$BEETDEFAULTS should only be match"
+	echo "    uses of bp. \$BEETDEFAULTS should only be beets 'match'"
 	echo "    options (e.g. \"genre:rock\" or \"^genre:chirstmas\","
 	echo "    other options may have unexpected behavior."
 	echo ""
-	echo "    All the command line options provided to bp or bps"
-	echo "    will be passed unchanged to the beet command. As"
-	echo "    such, no options will be passed to rplay."
+	echo "    All the command line options provided to bp (except bp's "
+	echo "    own options) will be passed unchanged to the beet command."
+	echo "    As such, no options will be passed to rplay."
 	echo "    To provide options to rplay use the environment"
 	echo "    variable RPLAYPARAMETERS (see 'rplay -h' for details)."
 	echo ""
@@ -35,17 +37,30 @@ fi
 
 tracks=()
 shuffle=
-if [[ "$0" =~ "bps$" ]]
-then
-	shuffle="--shuffle"
-fi
+show=
+
+while [[ "${1}" =~ "--shuffle|--show" ]]
+do
+	if [[ "${1}" == "--shuffle" ]]
+	then
+		shuffle="--shuffle"
+	elif [[ "${1}" == "--show" ]]
+	then
+		show=yes
+	fi
+	shift 1
+done
 
 BP=()
 eval "BP=($BEETDEFAULTS)"
 
 beet list -f '$path' "$@" "${BP}" | while read LINE
 do
-	tracks+=( "$LINE" )
+	tracks+=( "${LINE}" )
+	if [[ -n "${show}" ]]
+	then
+		echo "${LINE}"
+	fi
 done
 
 if [[ ${#tracks} -gt 0 ]]
