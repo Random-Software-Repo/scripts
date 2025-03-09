@@ -1,0 +1,136 @@
+#!/usr/bin/zsh
+
+function usage()
+{
+	print "    Usage:"
+	print "       spectrogram [options] <file name> [<additional files> ...]"
+	print ""
+	print "    Options:"
+	print "        -h           Print this usage text."
+	print "        -f           Force new output file generation, replacing"
+	print "                     any already existing file."
+	print ""
+	print "    Spectrogram will iterate over the file name or names provided and"
+	print "    generate spectrographs for each file in turn. "
+	print ""
+	print "    By default, spectrogram will create a png output file with the same"
+	print "    base file name, in a sub-directory of the directory containing the "
+	print "    original file called \"spectrograms\"."
+	print ""
+	print "    If there is a parameter following the file name, and that parameter"
+	print "    ends with .png, spectrogram will interpret this as the intended "
+	print "    output file name, and will put the spectrogram there, instead."
+	print ""
+	print "    In either case, if the output file already exist, spectrogram will"
+	print "    skip processing the file unless the -f option has been specified."
+	print ""
+	exit 0
+}
+
+function process_file()
+{
+	local source="${1}"
+	local destination="${2}"
+
+	print "--------------------------"
+	print "source     : ${source}"
+	print "destination: ${destination}"
+	print -n "generating ... "
+	local title="${source:t}" # title
+	local comment="Spectrogram by SoX"
+
+	duration=$(ffprobe "${source}" -v error -of compact=s=_ \
+		-select_streams "a:0" \
+		-show_entries stream=duration:format=duration 2>&1 >/dev/null | \
+		grep format_duration | \
+		awk -F= '{print $2}')
+
+	ffmpeg -hide_banner -i "${source}" \
+	"$ffmpeg_args[@]"\
+	 | \
+	sox \
+		"$sox_args[@]" \
+		spectrogram \
+		-d "${duration}" \
+		"$spectrogram_args[@]" \
+		-o "${destination}" \
+		-c "${comment}" \
+		-t "${title}"
+
+	print "done!"
+}
+
+# Aguments for ffmpeg and sox are defined in arrays here. This is only
+# helpful as we can add comments on each argument here for clairity
+
+# arguments for ffmpeg handling of it's input file 
+ffmpeg_args=(
+			"-vn" 				# drop any video streams
+			"-c:a" "flac"		# encode audio as flac
+			"-loglevel" "quiet" 
+			"-map" "a:0"		# first audio stream only
+			"-ac" "1"			# sum to mono (one audio channel)
+			"-f" "flac"			# output flac
+			"pipe:1 "			# piped
+			)
+
+# arguments for sox up to the spectrogram portion of it's command line.
+sox_args=(
+			"-t" "flac" "-"		# input is of type flac, on stdin
+			"--null"
+			"channels" "1"		# mono as the output of ffmpeg
+			"gain" "-n" "-3"	# normalize volume to -3dB
+			"rate" "50k"		# only show frequencies < 25kHz (half of the rate)
+			)
+
+# arguments for the spectrogram portion of the sox command line (that we can tell at this point)
+spectrogram_args=(
+			"-x" "1500"			# width of the spectrogram: 1500px (axies/legends will add)
+			"-y" "900"			# height of the spectrogram: 900px (axies/legends will add)
+			"-z" "120"			# 120dB depth
+			)
+
+forceoverwrite=
+if [[ "$#" == 0 ]]
+then
+	usage
+fi
+
+while [[ "${1}" ]]
+do
+	case "${1}" in
+		'-h' )
+			usage
+			;;
+		'-f' )
+			forceoverwrite=1
+			;;
+		* )
+			filename="${1}"
+			outputdir="${filename:h}/spectrograms"
+			outputfilename="${outputdir}/${filename:t:r}.png"
+			if [[ "${2}" =~ "\.png$" ]]
+			then
+				outputfilename="${2}"
+				shift
+			fi
+			if [[ -e "${outputfilename}" ]]
+			then
+				if [[ "${forceoverwrite}" == "" ]]
+				then
+					echo "${outputfilename} already exists. Skipping."
+					#have to shift here as we're skipping the shift at the end of the loop
+					shift
+					continue
+				fi
+			fi
+
+			if [[ ! -d "${outputfilename:h}" ]]
+			then
+				mkdir -p "${outputfilename:h}"
+			fi
+			process_file "${filename}" "${outputfilename}"
+			;;
+	esac
+	shift
+done
