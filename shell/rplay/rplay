@@ -42,11 +42,15 @@ function usage()
 	print "                           Resample the output to the specified rate"
 	print "                           in kilo-hertz (kHz). No default."
 	print "       --no-down-mix       By default rplay will down-mix all audio to "
-	print "                           2-channel stero output. This option will bypass"
-	print "                           this behavior, and retain the original channel"
+	print "                           2-channel stero output *before* sending to the"
+	print "                           remote playback device. This option will bypass"
+	print "                           that behavior, and retain the original channel"
 	print "                           layout (be that 5.1, 3.1, mono or otherwise)."
 	print "                           (Technically, the default will *up-mix* mono"
-	print "                           to stereo, but that's not an audible change.)"
+	print "                           to stereo, but that's probably not important.)"
+	print "                           The actual playback on the remote device, using"
+	print "                           sox's play, will undoubtedly down-mix to whatever"
+	print "                           channels are available on that device itself."
 	print ""
 	print "   rvolumeup and rvolumedown options:"
 	print "       <volume>            The value for <volume> defaults to a relative"
@@ -218,7 +222,7 @@ function play
 	##sox ${quiet} --combine sequence "$files[@]" -b ${bitrate} ${samplerate} -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
 
 	## ffmpeg | sox (play)
-	ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} ${downmixchannelsoption} ${downmixchannels} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
+	ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn ${downmixchannelsoption} ${downmixchannels} -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
 
 	## ffmpeg | ffmpeg (ffplay)
 	#ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "ffplay -hide_banner -nodisp -loglevel quiet -f flac - "
