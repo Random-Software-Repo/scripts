@@ -13,6 +13,10 @@ then
 	echo "        --shuffle    will play the tracks in random order."
 	echo "        --show       will print the paths to the tracks "
 	echo "                     before playing them."
+	echo "        --show-each  will be passed to rplay and will cause"
+	echo "                     rplay to display the name of each track"
+	echo "                     as it is played. This will bypass the"
+	echo "                     default gapless play."
 	echo ""
 	echo "    bp will call beet with the options \"-f '\$path'\". You will"
 	echo "    provide the search criteria to find the tracks desired."
@@ -38,8 +42,9 @@ fi
 tracks=()
 shuffle=
 show=
+showeach=
 
-while [[ "${1}" =~ "--shuffle|--show" ]]
+while [[ "${1}" =~ "--shuffle|--show|--show-each" ]]
 do
 	if [[ "${1}" == "--shuffle" ]]
 	then
@@ -47,6 +52,9 @@ do
 	elif [[ "${1}" == "--show" ]]
 	then
 		show=yes
+	elif [[ "${1}" == "--show-each" ]]
+	then
+		showeach="--show-each"
 	fi
 	shift 1
 done
@@ -65,7 +73,7 @@ done
 
 if [[ ${#tracks} -gt 0 ]]
 then
-	rplay ${shuffle} "${tracks[@]}"
+	rplay ${shuffle} ${shuffle} "${tracks[@]}"
 else
 	echo "No matches to "$@""
 fi
