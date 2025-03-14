@@ -73,7 +73,7 @@ done
 
 if [[ ${#tracks} -gt 0 ]]
 then
-	rplay ${shuffle} ${shuffle} "${tracks[@]}"
+	rplay ${shuffle} ${showeach} "${tracks[@]}"
 else
 	echo "No matches to "$@""
 fi
