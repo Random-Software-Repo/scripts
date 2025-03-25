@@ -28,7 +28,8 @@ function usage()
 	echo "bit after the \"2\")."
 	echo
 	echo "If there is more than 1 audio stream in a source file, only the first"
-	echo "stream (stream 0:a:0) will be extracted, the rest being omitted."
+	echo "stream (stream 0:a:0) will be extracted, the rest being omitted. See"
+	echo "the --stream option below for other behavior."
 	echo
 	echo "Converting to opus will omit all video streams including coverart as"
 	echo "ffmpeg does not support this. So far as audio2audio understands it, the"
@@ -88,6 +89,9 @@ function usage()
 	echo "	-f <path to ffmpeg>"
 	echo "		Path to the ffmpeg binary if it is either not already"
 	echo "		on the path, or an alternate version is preferred."
+	echo "	--stream <stream #>"
+	echo "		Will convert or extract audio stream <stream #>. The"
+	echo "		default is stream 0 (0:a:0)."
 	echo
 
 	exit 255
@@ -282,6 +286,13 @@ do
 				ffmpeg="${1}"
 			else
 				echo "Indicated ffmpeg location of \"${1}\" does not exist or is not executable. Ignoring."
+			fi
+			;;
+		--stream)
+			shift
+			if [[ ${1} -gt 0 ]]
+			then
+				mapa="0:a:${1}"
 			fi
 			;;
 		*)
