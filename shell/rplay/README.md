@@ -49,8 +49,10 @@ Other options that can be provided are:
  > Will resample the output to 48KHz
  * -96 | --96       
  > Will resample the output to 96KHz
- * -q | --quiet     
- > Will suppress all console output
+ * -v | -vv | -vvv  
+ > Will progressively print additional metadata about each track played.
+ * --gapless     
+ > Will play all songs gapless (no space between tracks). This will disable all track-specific details.
 
 
 ## Volume Control

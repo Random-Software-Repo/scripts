@@ -41,9 +41,24 @@ function usage()
 	print "       -48 | --48 | -96 | --96"
 	print "                           Resample the output to the specified rate"
 	print "                           in kilo-hertz (kHz). No default."
-	print "       --show-each         Will display the track name before each track"
-	print "                           is played. This will bypass the default gapless"
-	print "                           plaback."
+	print "       -v | --v            Print extra information about each track played,"
+	print "                           adding the artist & album artist name to the default"
+	print "                           album name, track number and track name."
+	print "       -vv | --vv          Will add track length to the -v output."
+	print "       -vvv | --vvv        Will add genre and date (originaldate) to the output."
+	print "                           Rplay will use exiftool (if installed) to extract"
+	print "                           metadata from all file types. If no metadata is "
+	print "                           found via exiftool (no metadata, no exiftool installed,"
+	print "                           or a file type unsupported by exiftool, like dsf) then"
+	print "                           rplay will \"guess\" that the file name includes the"
+	print "                           track number and title, the parent directory is the"
+	print "                           album name, and the grand-parent directory is the"
+	print "                           artist name. This may not be correct, but rplay can"
+	print "                           only work with what it's got."
+	print "       --gapless           Will play all tracks with no gap between them."
+	print "                           This will result in rplay being unable to display"
+	print "                           any track-specific details, and will override any."
+	print "                           -v options."
 	print "       --no-down-mix       By default rplay will down-mix all audio to "
 	print "                           2-channel stero output *before* sending to the"
 	print "                           remote playback device. This option will bypass"
@@ -221,17 +236,8 @@ function play
 		#files+=("${tracks[${i}]}")
 	done
 
-	if [[ -n ${showeach} ]]
+	if [[ ${gapless} ]]
 	then
-		for ((i = 1; i <= index; i++))
-		do
-			ffmpegfiles=("-i" "${tracks[${i}]}")
-			## ffmpeg | sox (play)
-
-			print "${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
-			ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=1:v=0:a=1[a]" -map "[a]" ${stats} -vn ${downmixchannelsoption} ${downmixchannels} -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
-		done
-	else
 		## sox | sox (play)
 		##sox ${quiet} --combine sequence "$files[@]" -b ${bitrate} ${samplerate} -t flac - | ssh ${RPLAYAUDIOTARGET} 'play -q --buffer=1024 -t flac - '
 
@@ -243,6 +249,66 @@ function play
 
 		## ffmpeg | mpv
 		#ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=${index}:v=0:a=1[a]" -map "[a]" ${stats} -vn -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "mpv --no-terminal - "
+	else
+		for ((i = 1; i <= index; i++))
+		do
+			ffmpegfiles=("-i" "${tracks[${i}]}")
+			## ffmpeg | sox (play)
+			local metadata="${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
+			if (( $+commands[exiftool] ))
+			then
+				trackmetadata=$(exiftool "${tracks[${i}]}")
+				local album="$(echo "${trackmetadata}" | grep '^Album[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local artist="$(echo "${trackmetadata}" | grep '^Artist[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local albumartist="$(echo "${trackmetadata}" | grep '^Album Artist[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local title="$(echo "${trackmetadata}" | grep '^Title[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local track="$(echo "${trackmetadata}" | grep '^Track Number[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local duration="$(echo "${trackmetadata}" | grep '^Duration[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local genre="$(echo "${trackmetadata}" | grep '^Genre[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local date="$(echo "${trackmetadata}" | grep '^Date[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local originaldate="$(echo "${trackmetadata}" | grep '^Originaldate[[:space:]]*:' | awk '-F: ' '{print $2}')"
+
+				if [[ "${album}" ]]
+				then
+					metadata="${album}\n  #${track}, ${title}"
+					if [[ ${verbose} -gt 1 ]]
+					then
+						if [[ "${albumartist}" ]]
+						then
+							if [[ "${albumartist}" != "${artist}" ]]
+							then
+								artist="${albumartist} (${artist})"
+							else
+								artist="${albumartist}"
+							fi
+						fi
+						metadata="${artist}\n${metadata}"
+					fi
+					if [[ ${verbose} -gt 3 ]]
+					then
+						if [[ "${genre}" ]]
+						then
+							metadata="${metadata}\n  Genre: ${genre}"
+						fi
+						if [[ "${date}" ]]
+						then
+							date="Released: ${date}"
+							if [[ "${originaldate}" ]]
+							then
+								date="${date} (original date: ${originaldate})"
+							fi
+							metadata="${metadata}\n  ${date}"
+						fi
+					fi
+					if [[ ${verbose} > 2 ]]
+					then
+						metadata="${metadata}\n  Length: ${duration}"
+					fi
+				fi
+			fi
+			print "${metadata}"
+			ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=1:v=0:a=1[a]" -map "[a]" ${stats} -vn ${downmixchannelsoption} ${downmixchannels} -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
+		done
 	fi
 }
 
@@ -261,6 +327,8 @@ function check_params()
 			"-q" | "--quiet")
 				quiet="-q"
 				stats=""
+				gapless=yes
+				verbose=
 				;;
 			"-s" | "--shuffle")
 				shuffle="shuffle"
@@ -273,11 +341,21 @@ function check_params()
 				downmixchannelsoption=
 				downmixchannels=
 				;;
-			"--show-each")
-				showeach=yes
+			"--gapless")
+				gapless=yes
+				verbose=
 				;;
 			"--diagnostics")
 				DIAGNOSTICS=yes
+				;;
+			"-v" | "--v")
+				verbose=2
+				;;
+			"-vv" | "--vv")
+				verbose=3
+				;;
+			"-vvv" | "--vvv")
+				verbose=4
 				;;
 			* )
 				(( index ++ ))
@@ -298,7 +376,8 @@ samplerateopt=
 samplerate=
 downmixchannelsoption=-ac
 downmixchannels=2
-showeach=
+gapless=
+verbose=1
 
 eval "rplayparams=($RPLAYPARAMETERS)"
 check_params $rplayparams
