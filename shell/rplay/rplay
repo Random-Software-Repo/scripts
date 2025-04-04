@@ -256,20 +256,22 @@ function play
 			local metadata="${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
 			if (( $+commands[ffprobe] ))
 			then
-				trackmetadata=$(ffprobe -hide_banner "${tracks[${i}]}"  2>&1 )
-				local album="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Album[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local artist="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Artist[[:space:]]*:' | head -1 | awk '-F: ' '{print $2}')"
-				local albumartist="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Album[ _]Artist[[:space:]]*:' | head -1 | awk '-F: ' '{print $2}')"
-				local title="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Title[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local track="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Track[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local duration="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Duration:' | awk '-F ' '{print $2}'| awk -F, '{print $1}')"
-				local genre="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Genre[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local date="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Date[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local originaldate="$(echo "${trackmetadata}" | egrep -i '^[[:space:]]*(TORY|ORIGINALDATE)[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				trackmetadata=$(ffprobe -hide_banner  -show_entries 'stream_tags : format_tags' "${tracks[${i}]}"  2> /dev/null )
+				local album="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM=' | awk '-F=' '{print $2}')"
+				local artist="$(echo "${trackmetadata}" | grep -i '^TAG:ARTIST=' | head -1 | awk '-F=' '{print $2}')"
+				local albumartist="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM_ARTIST' | head -1 | awk '-F=' '{print $2}')"
+				local title="$(echo "${trackmetadata}" | grep -i '^TAG:TITLE=' | awk '-F=' '{print $2}')"
+				local track="$(echo "${trackmetadata}" | grep -i '^TAG:track=' | awk '-F=' '{print $2}')"
+				local genre="$(echo "${trackmetadata}" | grep -i '^TAG:GENRE=' | awk '-F=' '{print $2}')"
+				local date="$(echo "${trackmetadata}" | grep -i '^TAG:DATE=' | awk '-F=' '{print $2}')"
+				local originaldate="$(echo "${trackmetadata}" | egrep -i '^TAG:(TORY|ORIGINALDATE)=' | awk '-F=' '{print $2}')"
+
+				trackstreamdata=$(ffprobe -hide_banner  -show_streams  -select_streams a "${tracks[${i}]}"  2> /dev/null )
+				local duration="$(echo "${trackstreamdata}" | grep -i '^duration=' | awk '-F=' '{print $2}')"
 
 				if [[ "${album}" ]]
 				then
-					metadata="${album}\n  #${track}, ${title}"
+					metadata="${album}\n  #${track} - ${title}"
 					if [[ ${verbose} -gt 1 ]]
 					then
 						if [[ "${albumartist}" ]]
@@ -301,7 +303,8 @@ function play
 					fi
 					if [[ ${verbose} > 2 ]]
 					then
-						metadata="${metadata}\n  Length: ${duration}"
+						local formatduration="$(date -ud "@${duration}" '+%T')"
+						metadata="${metadata}\n  Length: ${formatduration}"
 					fi
 				fi
 			fi
