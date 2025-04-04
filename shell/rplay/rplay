@@ -46,12 +46,11 @@ function usage()
 	print "                           album name, track number and track name."
 	print "       -vv | --vv          Will add track length to the -v output."
 	print "       -vvv | --vvv        Will add genre and date (originaldate) to the output."
-	print "                           Rplay will use exiftool (if installed) to extract"
+	print "                           Rplay will use ffprobe (if installed) to extract"
 	print "                           metadata from all file types. If no metadata is "
-	print "                           found via exiftool (no metadata, no exiftool installed,"
-	print "                           or a file type unsupported by exiftool, like dsf) then"
-	print "                           rplay will \"guess\" that the file name includes the"
-	print "                           track number and title, the parent directory is the"
+	print "                           found via ffprobe (no metadata, no ffprobe installed)"
+	print "                           then rplay will \"guess\" that the file name includes"
+	print "                           the track number and title, the parent directory is the"
 	print "                           album name, and the grand-parent directory is the"
 	print "                           artist name. This may not be correct, but rplay can"
 	print "                           only work with what it's got."
@@ -255,18 +254,18 @@ function play
 			ffmpegfiles=("-i" "${tracks[${i}]}")
 			## ffmpeg | sox (play)
 			local metadata="${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
-			if (( $+commands[exiftool] ))
+			if (( $+commands[ffprobe] ))
 			then
-				trackmetadata=$(exiftool "${tracks[${i}]}")
-				local album="$(echo "${trackmetadata}" | grep '^Album[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local artist="$(echo "${trackmetadata}" | grep '^Artist[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local albumartist="$(echo "${trackmetadata}" | grep '^Album Artist[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local title="$(echo "${trackmetadata}" | grep '^Title[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local track="$(echo "${trackmetadata}" | grep '^Track Number[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local duration="$(echo "${trackmetadata}" | grep '^Duration[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local genre="$(echo "${trackmetadata}" | grep '^Genre[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local date="$(echo "${trackmetadata}" | grep '^Date[[:space:]]*:' | awk '-F: ' '{print $2}')"
-				local originaldate="$(echo "${trackmetadata}" | grep '^Originaldate[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				trackmetadata=$(ffprobe -hide_banner "${tracks[${i}]}"  2>&1 )
+				local album="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Album[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local artist="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Artist[[:space:]]*:' | head -1 | awk '-F: ' '{print $2}')"
+				local albumartist="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Album[ _]Artist[[:space:]]*:' | head -1 | awk '-F: ' '{print $2}')"
+				local title="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Title[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local track="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Track[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local duration="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Duration:' | awk '-F ' '{print $2}'| awk -F, '{print $1}')"
+				local genre="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Genre[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local date="$(echo "${trackmetadata}" | grep -i '^[[:space:]]*Date[[:space:]]*:' | awk '-F: ' '{print $2}')"
+				local originaldate="$(echo "${trackmetadata}" | egrep -i '^[[:space:]]*(TORY|ORIGINALDATE)[[:space:]]*:' | awk '-F: ' '{print $2}')"
 
 				if [[ "${album}" ]]
 				then
