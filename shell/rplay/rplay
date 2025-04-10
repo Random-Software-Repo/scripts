@@ -317,7 +317,7 @@ function play
 				done
 				print ""
 			fi
-			print "${metadata}"
+			print "${i} of ${index}\n${metadata}"
 			ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=1:v=0:a=1[a]" -map "[a]" ${stats} -vn ${downmixchannelsoption} ${downmixchannels} -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
 		done
 	fi
