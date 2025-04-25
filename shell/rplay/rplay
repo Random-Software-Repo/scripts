@@ -256,7 +256,7 @@ function play
 			local metadata="${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
 			if (( $+commands[ffprobe] ))
 			then
-				trackmetadata=$(ffprobe -hide_banner  -show_entries 'stream_tags : format_tags' "${tracks[${i}]}"  2> /dev/null )
+				trackmetadata=$(ffprobe -hide_banner -select_streams a:0 -show_entries 'stream_tags : format_tags' "${tracks[${i}]}"  2> /dev/null )
 				local album="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM=' | awk '-F=' '{print $2}')"
 				local artist="$(echo "${trackmetadata}" | grep -i '^TAG:ARTIST=' | head -1 | awk '-F=' '{print $2}')"
 				local albumartist="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM_ARTIST' | head -1 | awk '-F=' '{print $2}')"
