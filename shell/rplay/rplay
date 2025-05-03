@@ -256,7 +256,7 @@ function play
 			local metadata="${tracks[${i}]:h:t} / ${tracks[${i}]:t:r}"
 			if (( $+commands[ffprobe] ))
 			then
-				trackmetadata=$(ffprobe -hide_banner -select_streams a:0 -show_entries 'stream_tags : format_tags' "${tracks[${i}]}"  2> /dev/null )
+				local trackmetadata=$(ffprobe -hide_banner -select_streams a:0 -show_entries 'stream_tags : format_tags' "${tracks[${i}]}"  2> /dev/null )
 				local album="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM=' | awk '-F=' '{print $2}')"
 				local artist="$(echo "${trackmetadata}" | grep -i '^TAG:ARTIST=' | head -1 | awk '-F=' '{print $2}')"
 				local albumartist="$(echo "${trackmetadata}" | grep -i '^TAG:ALBUM_ARTIST' | head -1 | awk '-F=' '{print $2}')"
@@ -266,8 +266,27 @@ function play
 				local date="$(echo "${trackmetadata}" | grep -i '^TAG:DATE=' | awk '-F=' '{print $2}')"
 				local originaldate="$(echo "${trackmetadata}" | egrep -i '^TAG:(TORY|ORIGINALDATE)=' | awk '-F=' '{print $2}')"
 				local composer="$(echo "${trackmetadata}" | grep -i '^TAG:COMPOSER=' | awk '-F=' '{print $2}')"
-				trackstreamdata=$(ffprobe -hide_banner  -show_streams  -select_streams a "${tracks[${i}]}"  2> /dev/null )
-				local duration="$(echo "${trackstreamdata}" | grep -i '^duration=' | awk '-F=' '{print $2}')"
+
+				local trackstreamdata=$(ffprobe -hide_banner  -show_streams  -select_streams a:0 "${tracks[${i}]}" 2>&1  )
+				local duration="$(echo "${trackstreamdata}" | grep -i ' Duration: ' | awk '-FDuration: ' '{print $2}'| awk '-F,' '{print $1}')"
+				local displaysamplerate="$(echo "${trackstreamdata}" | grep -i ' Audio: ' | awk '-FAudio: ' '{print $2}'| awk '-F, ' '{print $2}'| awk '-F ' '{print $1}')"
+				local displaysamplesize="$(echo "${trackstreamdata}" | grep -i ' Audio: ' | awk '-FAudio: ' '{print $2}'| awk '-F, ' '{print $4}')"
+					if [[ "${displaysamplesize}" =~ '^s16' ]]
+					then
+						displaysamplesize=16bit
+					elif [[ "${displaysamplesize}" =~ '24 bit' ]]
+					then
+						displaysamplesize=24bit
+					elif [[ "${displaysamplesize}" =~ '32 bit' ]]
+					then
+						displaysamplesize=32bit
+					elif [[ "${displaysamplesize}" == "fltp" ]]
+					then
+						displaysamplesize=1bit
+						(( displaysamplerate = displaysamplerate * 8 ))
+					fi
+				local displaychannels="$(echo "${trackstreamdata}" | grep -i ' Audio: ' | awk '-FAudio: ' '{print $2}'| awk '-F, ' '{print $3}'| awk '-F(' '{print $1}')"
+
 
 				if [[ "${album}" ]]
 				then
@@ -307,8 +326,9 @@ function play
 					fi
 					if [[ ${verbose} > 2 ]]
 					then
-						local formatduration="$(date -ud "@${duration}" '+%T')"
+						local formatduration="$(date -ud "${duration}" '+%T')"
 						metadata="${metadata}\n  Length: ${formatduration}"
+						metadata="${metadata}\n  ${displaysamplesize}-${displaysamplerate}hz, ${displaychannels}"
 					fi
 				fi
 			fi
@@ -322,6 +342,7 @@ function play
 				print ""
 			fi
 			print "${i} of ${index}\n${metadata}"
+
 			ffmpeg -hide_banner  -loglevel quiet "$ffmpegfiles[@]" -filter_complex "concat=n=1:v=0:a=1[a]" -map "[a]" ${stats} -vn ${downmixchannelsoption} ${downmixchannels} -c:a flac ${samplerateopt} ${samplerate} -f flac pipe:1  | ssh ${RPLAYAUDIOTARGET} "play -q -t flac - "
 		done
 	fi
