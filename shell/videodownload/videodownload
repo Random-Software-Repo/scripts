@@ -1,0 +1,229 @@
+#!/usr/bin/zsh
+
+##*********************************************
+##*********************************************
+##
+##	Wrapper to aid downloading videos from youtube using
+##	youtube-dl or yt-dlp
+##
+##*********************************************
+##*********************************************
+
+local commandused=${0:t}
+local YTRES=
+local ytdlcommand=yt-dlp
+
+if (( $+commands[yt-dlp] ))
+then
+	ytdlcommand=yt-dlp
+elif (( $+commands[youtube-dl] ))
+then
+	## No yt-dlp present, using youtube-dl instead. This probably won't work.
+	ytdlcommand=youtube-dl
+fi
+	
+function usage
+{
+	print "Usage:"
+	print "	${commandused} <vertical-resolution> <url-to-video>"
+	print ""
+	print "${commandused} attempts to download a video from a web-site (youtube, or others)"
+	print "with a maximum vertical resolution of <vertical-resolution>. The video"
+	print "will be downloaded into the first of ~/tmp, ~/downloads, ~/Downloads, or"
+	print "~/ if none of those directories exist."
+	print ""
+	print "If the video is not available in the specified resolution, ytdl will"
+	print "attempt to download the video using the specified resolution as a "
+	print "maximum horizontal resolution instead. This may work for some videos."
+}
+function yf-usage
+{
+	print 'Usage:'
+	print '	yf <video id> <url>'
+	print '		OR '
+	print '	yf <url> <video id>'
+	print '	Will download the specific variant of <url> specified by <video id>'
+	print '	<url> must begin with http:// or https://'
+	print '	The order of parameters does not matter.'
+	print '		OR'
+	print '	yf <url>'
+	print "	Will lookup and display which video options are available for <url>"
+	print
+	exit -1
+}
+
+
+function cdytdl
+{
+	echo "cdytdl $@"
+	# will cd into the first of ~/tmp, ~/downloads, ~/Downloads, or ~/ found
+	# before downloading the video specified (via xytdl)
+	local owd=${PWD}
+	if [[ -d ~/tmp ]]
+	then
+		cd ~/tmp
+	elif [[ -d ~/downloads ]]
+	then
+		cd ~/downloads
+	elif [[ -d ~/Downloads ]]
+	then
+		cd ~/Downloads
+	else
+		cd ~/
+	fi
+	xytdl "$@"
+	cd ${owd}
+}
+function xytdl
+{
+	# will download the video at the url specified.
+	# if the local variable YTRES is set, will use the specified resolution as height.
+	# if that operation fails, xytdl will retry with the specified resolution as width.
+	if [[ "$#" -lt 1 ]]
+	then
+		usage
+	else
+		#while [[ "${1}" ]]
+		#do
+			local url="$(xcleanurl "${1}")"
+			shift 1
+			if [[ -n ${YTRES} ]]
+			then
+				echo "Downloading \"${url}\" $YTRES tall"
+				echo ${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
+				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
+				if [[ ! $? -eq 0 ]]
+				then
+					echo "Did not download video in ${resolution} tall. Trying width..."
+					${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[width=${YTRES}])+(bestaudio)" "$@" "${url}"
+				fi
+			else
+				echo "Downloading \"${url}\""
+				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime "$@" "${url}"
+			fi
+		#	shift 1
+		#done
+	fi
+}
+function xcleanurl
+{
+	# Will strip extra parameters from any youtube urls.
+	# Well, specifically *youtube.com, www.youtube-nocookie.com, or youtu.be
+	# Will also only use https in resulting youtube urls, regardless of whether or not the url given was https.
+	# Non-youtube urls (vimeo, e.g.) will be unchanged.
+	local xurl="${1}"
+	if [[ "${xurl}" =~ 'youtube\.com\/' ]]
+	then
+		local video=$(echo "${xurl}" | awk '-Fv=' '{print $2}'| awk '-F&' '{print $1}')
+		xurl="https://www.youtube.com/watch?v=${video}"
+	elif [[ "${xurl}" =~ 'youtube-nocookie\.com\/' ]]
+	then
+		local video=$(echo "${xurl}" | awk '-Fembed/' '{print $2}'| awk '-F?' '{print $1}')
+		xurl="https://www.youtube-nocookie.com/embed/${video}"
+	elif [[ "${xurl}" =~ 'youtu.be\/' ]]
+	then
+		local video=$(echo "${xurl}" | awk '-Fyoutu.be/' '{print $2}'| awk '-F?' '{print $1}')
+		xurl="https://youtu.be/${video}"
+	fi
+	echo "${xurl}"
+}
+
+function getres
+{
+	num=${1}
+	#echo Num: $num
+	local res=1080
+	case ${num} in
+		"3")
+			res=360
+			;;
+		"5")
+			res=540
+			;;
+		"6")
+			res=640
+			;;
+		"7")
+			res=720
+			;;
+		"8")
+			res=800
+			;;
+		"9")
+			res=900;
+			;;
+		"10")
+			res=1080
+			;;
+		"4k")
+			res=2160
+			;;
+		*)
+			if [[ ${num} -gt 99 ]]
+			then
+				res=${num}
+			fi
+			;;
+	esac
+	YTRES=${res}
+}
+function yf
+{
+	## see yf-usage for explanation
+	if [[ "$#" -eq 2 ]]
+	then
+		url=
+		resid=
+		if [[ "$1" =~ 'http[s]?://' ]]
+		then
+			echo "1 http or https"
+			url="$1"
+			resid="$2"
+		elif [[ "$2" =~ 'http[s]?://' ]]
+		then
+			echo "2 http or https"
+			url="$2"
+			resid="$1"
+		else
+			yf-usage
+		fi
+		#echo "yt-dlp -f $resid $url"
+		xytdl "$url" -f "$resid"
+	elif [[ "$#" -eq 1 ]]
+	then
+		xytdl "$1" -F
+	else	
+		usage
+	fi
+
+}
+
+if  [[ "${commandused}" == "ya" ]]
+then
+	# audio only
+	cdytdl -f "(bestaudio[vcodec=none])" "$@"
+
+elif  [[ "${commandused}" =~ "^y[0-9]" ]]
+then
+	getres ${commandused:1}
+	#echo YTRES = "${YTRES}"
+	cdytdl "$@"
+elif  [[ "${commandused}" =~ "^xy[0-9]" ]]
+then
+	getres ${commandused:2}
+	#echo YTRES = "${YTRES}"
+	xytdl "$@"
+elif  [[ "${commandused}" =~ "^yf" ]]
+then
+	yf "$@"
+else
+	cdytdl "$@"
+fi
+
+##*********************************************
+##*********************************************
+##
+##	END OF YOUTUBE
+##
+##*********************************************
+##*********************************************
