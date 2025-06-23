@@ -111,8 +111,13 @@ function xcleanurl
 	# Well, specifically *youtube.com, www.youtube-nocookie.com, or youtu.be
 	# Will also only use https in resulting youtube urls, regardless of whether or not the url given was https.
 	# Non-youtube urls (vimeo, e.g.) will be unchanged.
+	
 	local xurl="${1}"
-	if [[ "${xurl}" =~ 'youtube\.com\/' ]]
+	if [[ "${xurl}" =~ 'youtube\.com\/shorts\/' ]]
+	then
+		local video=$(echo "${xurl}" | awk '-Fshorts/' '{print $2}'| awk '-F?' '{print $1}')
+		xurl="https://www.youtube.com/shorts/${video}"
+	elif [[ "${xurl}" =~ 'youtube\.com\/' ]]
 	then
 		local video=$(echo "${xurl}" | awk '-Fv=' '{print $2}'| awk '-F&' '{print $1}')
 		xurl="https://www.youtube.com/watch?v=${video}"
