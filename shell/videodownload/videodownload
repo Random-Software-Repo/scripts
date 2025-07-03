@@ -12,6 +12,7 @@
 local commandused=${0:t}
 local YTRES=
 local ytdlcommand=yt-dlp
+local youtube=
 
 if (( $+commands[yt-dlp] ))
 then
@@ -90,16 +91,16 @@ function xytdl
 			if [[ -n ${YTRES} ]]
 			then
 				echo "Downloading \"${url}\" $YTRES tall"
-				echo ${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
-				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
+				echo ${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime -o "%(channel)s - %(title)s - [%(id)s].%(ext)s" -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
+				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime -o "%(channel)s - %(title)s - [%(id)s].%(ext)s" -f "(bestvideo[height=${YTRES}])+(bestaudio)" "$@" "${url}"
 				if [[ ! $? -eq 0 ]]
 				then
 					echo "Did not download video in ${resolution} tall. Trying width..."
-					${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime  -f "(bestvideo[width=${YTRES}])+(bestaudio)" "$@" "${url}"
+					${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime -o "%(channel)s - %(title)s - [%(id)s].%(ext)s" -f "(bestvideo[width=${YTRES}])+(bestaudio)" "$@" "${url}"
 				fi
 			else
 				echo "Downloading \"${url}\""
-				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime "$@" "${url}"
+				${ytdlcommand} --retry-sleep 10 --no-mtime  --abort-on-error --merge-output-format mkv --no-mtime -o "%(channel)s - %(title)s - [%(id)s].%(ext)s" "$@" "${url}"
 			fi
 		#	shift 1
 		#done
@@ -111,22 +112,27 @@ function xcleanurl
 	# Well, specifically *youtube.com, www.youtube-nocookie.com, or youtu.be
 	# Will also only use https in resulting youtube urls, regardless of whether or not the url given was https.
 	# Non-youtube urls (vimeo, e.g.) will be unchanged.
+	youtube=
 	
 	local xurl="${1}"
 	if [[ "${xurl}" =~ 'youtube\.com\/shorts\/' ]]
 	then
+		youtube=yes
 		local video=$(echo "${xurl}" | awk '-Fshorts/' '{print $2}'| awk '-F?' '{print $1}')
 		xurl="https://www.youtube.com/shorts/${video}"
 	elif [[ "${xurl}" =~ 'youtube\.com\/' ]]
 	then
+		youtube=yes
 		local video=$(echo "${xurl}" | awk '-Fv=' '{print $2}'| awk '-F&' '{print $1}')
 		xurl="https://www.youtube.com/watch?v=${video}"
 	elif [[ "${xurl}" =~ 'youtube-nocookie\.com\/' ]]
 	then
+		youtube=yes
 		local video=$(echo "${xurl}" | awk '-Fembed/' '{print $2}'| awk '-F?' '{print $1}')
 		xurl="https://www.youtube-nocookie.com/embed/${video}"
 	elif [[ "${xurl}" =~ 'youtu.be\/' ]]
 	then
+		youtube=yes
 		local video=$(echo "${xurl}" | awk '-Fyoutu.be/' '{print $2}'| awk '-F?' '{print $1}')
 		xurl="https://youtu.be/${video}"
 	fi
