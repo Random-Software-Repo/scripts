@@ -148,6 +148,9 @@ function getres
 		"3")
 			res=360
 			;;
+		"4")
+			res=480
+			;;
 		"5")
 			res=540
 			;;
